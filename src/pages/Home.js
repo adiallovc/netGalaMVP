@@ -10,30 +10,24 @@ function Home() {
   ]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('trending');
-  const [filter, setFilter] = useState('recent');
+  const [timeFilter, setTimeFilter] = useState('last24hours');
+  
+  const timeFilters = [
+    { id: 'last24hours', name: 'Last 24 Hours' },
+    { id: 'alltime', name: 'All Time Videos' }
+  ];
   
   useEffect(() => {
     // For now, we'll use the hardcoded categories above instead of fetching
-    // const fetchCategories = async () => {
-    //   try {
-    //     setLoading(true);
-    //     const data = await getCategories();
-    //     setCategories(data);
-    //     if (data.length > 0) {
-    //       setSelectedCategory(data[0].id);
-    //     }
-    //   } catch (error) {
-    //     console.error("Failed to fetch categories:", error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    
-    // fetchCategories();
+    // This would be replaced with an API call in a full implementation
   }, []);
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
+  };
+  
+  const handleTimeFilterChange = (e) => {
+    setTimeFilter(e.target.value);
   };
 
   if (loading) {
@@ -66,7 +60,8 @@ function Home() {
           { className: "col-md-6 mx-auto" },
           React.createElement(
             "div",
-            { className: "d-flex justify-content-center" },
+            { className: "d-flex justify-content-center gap-3" },
+            // Category dropdown
             React.createElement(
               "select",
               {
@@ -74,7 +69,7 @@ function Home() {
                 value: selectedCategory || '',
                 onChange: handleCategoryChange,
                 style: {
-                  maxWidth: '400px',
+                  maxWidth: '200px',
                   borderColor: '#e0e0e0',
                   borderRadius: '4px'
                 }
@@ -86,13 +81,34 @@ function Home() {
                   category.name
                 )
               )
+            ),
+            // Time filter dropdown
+            React.createElement(
+              "select",
+              {
+                className: "form-select",
+                value: timeFilter,
+                onChange: handleTimeFilterChange,
+                style: {
+                  maxWidth: '200px',
+                  borderColor: '#e0e0e0',
+                  borderRadius: '4px'
+                }
+              },
+              timeFilters.map(filter => 
+                React.createElement(
+                  "option",
+                  { key: filter.id, value: filter.id },
+                  filter.name
+                )
+              )
             )
           )
         )
       ),
       React.createElement(VideoCarousel, {
         categoryId: selectedCategory,
-        filter: filter
+        timeFilter: timeFilter
       })
     )
   );
