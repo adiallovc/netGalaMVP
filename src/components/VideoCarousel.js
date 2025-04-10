@@ -249,7 +249,7 @@ function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
                 React.createElement(
                   "i",
                   { 
-                    className: isLiked ? "bi bi-heart-fill" : "bi bi-heart", 
+                    className: isLiked ? "bi bi-hand-thumbs-up-fill" : "bi bi-hand-thumbs-up", 
                     style: { fontSize: '22px' }
                   }
                 )
