@@ -87,12 +87,8 @@ function App() {
           )
         }),
         React.createElement(Route, { 
-          path: "/channel", 
-          element: React.createElement(
-            ProtectedRoute,
-            null,
-            React.createElement(Channel, null)
-          )
+          path: "/channel/:userId", 
+          element: React.createElement(Channel, null)
         }),
         React.createElement(Route, { 
           path: "/profile/:userId", 

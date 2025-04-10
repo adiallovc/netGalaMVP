@@ -1,26 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-// import { getUserVideos, deleteVideo } from '../services/videoService';
-// import { getCurrentUser } from '../services/auth';
+import { useParams } from 'react-router-dom';
+// import { getUserById } from '../services/auth';
+// import { getVideosByUserId } from '../services/video';
 
 function Channel() {
+  const { userId } = useParams();
+  const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [user, setUser] = useState({
-    id: 'user1',
-    username: 'DemoUser',
-    email: 'demo@example.com'
-  });
-  
-  // Simplified render methods that use React.createElement
-  const renderLoading = () => {
+  const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+
+  useEffect(() => {
+    // In a real app, fetch the user and their videos
+    // For now, use mock data
+    setTimeout(() => {
+      setUser({
+        id: userId || 'user1',
+        username: 'Channel Creator',
+        avatar: 'https://i.pravatar.cc/150?img=1',
+        bio: 'Creating awesome AI-generated music videos'
+      });
+      
+      setVideos([
+        {
+          id: 1,
+          title: 'AI Music Video - Electronic',
+          thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+          views: 1254,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          title: 'Landscape Visualizer Demo',
+          thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg',
+          views: 892,
+          createdAt: new Date().toISOString()
+        }
+      ]);
+      
+      setFollowersCount(124);
+      setLoading(false);
+    }, 500);
+  }, [userId]);
+
+  const handleFollow = () => {
+    setIsFollowing(!isFollowing);
+    setFollowersCount(prevCount => isFollowing ? prevCount - 1 : prevCount + 1);
+  };
+
+  if (loading) {
     return React.createElement(
       "div",
       { className: "text-center py-5" },
       React.createElement(
         "div",
-        { className: "spinner-border text-primary", role: "status" },
+        { className: "spinner-border", role: "status" },
         React.createElement(
           "span",
           { className: "visually-hidden" },
@@ -28,124 +63,136 @@ function Channel() {
         )
       )
     );
-  };
-  
-  const renderError = () => {
-    return React.createElement(
-      "div",
-      { className: "alert alert-danger", role: "alert" },
-      error
-    );
-  };
-  
-  const renderLoginPrompt = () => {
-    return React.createElement(
-      "div",
-      { className: "text-center py-5" },
-      React.createElement(
-        "div",
-        { className: "mb-4" },
-        React.createElement(
-          "i",
-          { 
-            className: "bi bi-person-x",
-            style: { fontSize: '48px', color: '#6f42c1' }
-          }
-        )
-      ),
-      React.createElement("h4", null, "Please login to view your channel"),
-      React.createElement(
-        Link,
-        { 
-          to: "/auth", 
-          className: "btn btn-primary mt-3",
-          style: { backgroundColor: '#6f42c1', borderColor: '#6f42c1' }
-        },
-        "Login Now"
-      )
-    );
-  };
-  
-  const renderEmptyChannel = () => {
-    return React.createElement(
-      "div",
-      { className: "text-center py-5 bg-light rounded" },
-      React.createElement(
-        "div",
-        { className: "mb-3" },
-        React.createElement(
-          "i",
-          { 
-            className: "bi bi-film",
-            style: { fontSize: '48px', color: '#6f42c1' }
-          }
-        )
-      ),
-      React.createElement("h4", null, "You haven't uploaded any videos yet"),
-      React.createElement(
-        "p",
-        { className: "text-muted mb-4" },
-        "Start sharing your content with the world"
-      ),
-      React.createElement(
-        "div",
-        { className: "d-flex justify-content-center gap-3" },
-        React.createElement(
-          Link,
-          { 
-            to: "/upload", 
-            className: "btn btn-primary",
-            style: { backgroundColor: '#6f42c1', borderColor: '#6f42c1' }
-          },
-          "Upload Video"
-        ),
-        React.createElement(
-          Link,
-          { 
-            to: "/create", 
-            className: "btn btn-outline-primary",
-            style: { borderColor: '#6f42c1', color: '#6f42c1' }
-          },
-          "Create with AI"
-        )
-      )
-    );
-  };
+  }
 
-  if (loading) {
-    return renderLoading();
-  }
-  
-  if (error) {
-    return renderError();
-  }
-  
   if (!user) {
-    return renderLoginPrompt();
+    return React.createElement(
+      "div",
+      { className: "container py-5" },
+      React.createElement(
+        "div",
+        { className: "alert alert-warning" },
+        "User not found"
+      )
+    );
   }
 
   return React.createElement(
     "div",
-    { className: "channel-page" },
+    { className: "channel-page py-4" },
     React.createElement(
       "div",
       { className: "container" },
+      // User header section
       React.createElement(
         "div",
-        { className: "d-flex justify-content-between align-items-center mb-4" },
-        React.createElement("h2", null, "My Channel"),
+        { className: "row mb-5" },
         React.createElement(
-          Link,
-          { 
-            to: "/upload", 
-            className: "btn btn-primary",
-            style: { backgroundColor: '#6f42c1', borderColor: '#6f42c1' }
-          },
-          "Upload New Video"
+          "div",
+          { className: "col-md-8 mx-auto" },
+          React.createElement(
+            "div",
+            { className: "d-flex align-items-center mb-4" },
+            // User avatar
+            React.createElement(
+              "img",
+              {
+                src: user.avatar,
+                alt: user.username,
+                className: "rounded-circle me-4",
+                style: { width: '100px', height: '100px', objectFit: 'cover' }
+              }
+            ),
+            // User info
+            React.createElement(
+              "div",
+              null,
+              React.createElement(
+                "h2",
+                { className: "mb-2" },
+                user.username
+              ),
+              React.createElement(
+                "div",
+                { className: "d-flex align-items-center mb-2" },
+                React.createElement(
+                  "span",
+                  { className: "me-3" },
+                  `${followersCount} followers`
+                ),
+                React.createElement(
+                  "span",
+                  null,
+                  `${videos.length} videos`
+                )
+              ),
+              React.createElement(
+                "button",
+                {
+                  className: isFollowing 
+                    ? "btn btn-primary" 
+                    : "btn btn-outline-primary",
+                  onClick: handleFollow,
+                  style: { 
+                    backgroundColor: isFollowing ? '#6f42c1' : 'transparent',
+                    borderColor: '#6f42c1',
+                    color: isFollowing ? 'white' : '#6f42c1'
+                  }
+                },
+                isFollowing ? "Following" : "Follow"
+              )
+            )
+          ),
+          user.bio && React.createElement(
+            "p",
+            { className: "mt-3" },
+            user.bio
+          )
         )
       ),
-      // We'll just render the empty channel state for now
-      renderEmptyChannel()
+      // Videos section
+      React.createElement(
+        "h3",
+        { className: "mb-4" },
+        "Videos"
+      ),
+      React.createElement(
+        "div",
+        { className: "row" },
+        videos.map(video => 
+          React.createElement(
+            "div",
+            { className: "col-md-4 col-sm-6 mb-4", key: video.id },
+            React.createElement(
+              "div",
+              { className: "card h-100" },
+              React.createElement(
+                "img",
+                {
+                  src: video.thumbnailUrl,
+                  alt: video.title,
+                  className: "card-img-top",
+                  style: { aspectRatio: '16/9', objectFit: 'cover' }
+                }
+              ),
+              React.createElement(
+                "div",
+                { className: "card-body" },
+                React.createElement(
+                  "h5",
+                  { className: "card-title" },
+                  video.title
+                ),
+                React.createElement(
+                  "p",
+                  { className: "card-text text-muted small" },
+                  new Date(video.createdAt).toLocaleDateString()
+                )
+              )
+            )
+          )
+        )
+      )
     )
   );
 }

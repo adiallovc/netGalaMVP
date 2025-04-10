@@ -148,15 +148,17 @@ function VideoCarousel({ categoryId, timeFilter }) {
           React.createElement(
             "div",
             { className: "d-flex align-items-center" },
-            // User info
+            // User info with link to channel
             React.createElement(
               "a",
               { 
-                href: '#', 
+                href: `/channel/${currentVideo.userId}`, 
                 className: "text-decoration-none",
                 onClick: (e) => {
                   e.preventDefault();
+                  // In a real app, you would navigate to the user's channel page
                   console.log(`Navigate to profile: ${currentVideo.userId}`);
+                  // Using window.location would be: window.location.href = `/channel/${currentVideo.userId}`;
                 }
               },
               React.createElement(
@@ -189,6 +191,31 @@ function VideoCarousel({ categoryId, timeFilter }) {
                 }
               },
               "Follow"
+            ),
+            // Heart icon with counter 
+            React.createElement(
+              "div",
+              { className: "d-flex align-items-center ms-3" },
+              React.createElement(
+                "button",
+                { 
+                  className: "btn btn-sm p-0 me-1",
+                  onClick: () => console.log(`Like video: ${currentVideo.id}`),
+                  style: { color: "#ff4757" }
+                },
+                React.createElement(
+                  "i",
+                  { 
+                    className: "bi bi-heart", 
+                    style: { fontSize: '20px' }
+                  }
+                )
+              ),
+              React.createElement(
+                "span",
+                { style: { fontSize: '14px' } },
+                currentVideo.likes || 0
+              )
             ),
             // Empty div for spacing
             React.createElement(

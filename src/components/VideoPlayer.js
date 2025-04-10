@@ -224,14 +224,42 @@ function VideoPlayer({ videoUrl, thumbnail, title, userId, username, userAvatar 
         src: videoUrl,
         poster: thumbnail,
         className: "w-100 h-100",
+        onClick: handlePlay, // Add click handler to play/pause
         onTimeUpdate: handleTimeUpdate,
         onLoadedMetadata: handleLoadedMetadata,
         onEnded: () => setIsPlaying(false),
-        style: { objectFit: 'contain', width: '100%', height: '100%', borderRadius: '10px' }
+        style: { objectFit: 'contain', width: '100%', height: '100%', borderRadius: '10px', cursor: 'pointer' }
       }
     ),
     // Play button overlay
     createPlayButton(),
+    // Play/Pause indicator overlay (always visible on hover)
+    React.createElement(
+      "div",
+      {
+        className: "position-absolute top-50 start-50 translate-middle",
+        style: { 
+          opacity: showControls ? 0.8 : 0, 
+          transition: 'opacity 0.3s ease',
+          pointerEvents: 'none',
+          zIndex: 2
+        }
+      },
+      React.createElement(
+        "div",
+        {
+          className: "d-flex align-items-center justify-content-center bg-dark bg-opacity-50 rounded-circle",
+          style: { width: '70px', height: '70px' }
+        },
+        React.createElement(
+          "i",
+          {
+            className: isPlaying ? "bi bi-pause-fill text-white" : "bi bi-play-fill text-white",
+            style: { fontSize: '36px' }
+          }
+        )
+      )
+    ),
     // Video controls
     createVideoControls(),
     // User info overlay
