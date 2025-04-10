@@ -9,7 +9,6 @@ function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     // Fetch videos from the API
@@ -64,21 +63,7 @@ function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
     console.log(`${isFollowing ? 'Unfollow' : 'Follow'} user: ${currentVideo?.userId}`);
   };
   
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    // In a real app, this would make an API call to like/unlike the video
-    console.log(`${isLiked ? 'Unlike' : 'Like'} video: ${currentVideo?.id}`);
-    
-    // Update videos array with new like count (for demo purposes)
-    const updatedVideos = [...videos];
-    updatedVideos[currentIndex] = {
-      ...currentVideo,
-      likes: isLiked 
-        ? (currentVideo.likes || 1) - 1 
-        : (currentVideo.likes || 0) + 1
-    };
-    setVideos(updatedVideos);
-  };
+  // Removed like functionality
 
   if (loading) {
     return React.createElement(
@@ -235,32 +220,24 @@ function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
               "div",
               { className: "ms-auto" }
             ),
-            // Heart icon with counter (now aligned to the right)
+            // View count
             React.createElement(
               "div",
               { className: "d-flex align-items-center" },
               React.createElement(
-                "button",
+                "i",
                 { 
-                  className: "btn btn-sm p-0 me-1",
-                  onClick: handleLike,
-                  style: { color: isLiked ? "#ff4757" : "#6c757d" }
-                },
-                React.createElement(
-                  "i",
-                  { 
-                    className: isLiked ? "bi bi-hand-thumbs-up-fill" : "bi bi-hand-thumbs-up", 
-                    style: { fontSize: '22px' }
-                  }
-                )
+                  className: "bi bi-eye me-1", 
+                  style: { fontSize: '22px', color: "#6c757d" } 
+                }
               ),
               React.createElement(
                 "span",
                 { 
-                  style: { fontSize: '14px' },
+                  style: { fontSize: '14px', color: "#6c757d" },
                   className: "me-3" // Added right margin for spacing
                 },
-                currentVideo.likes || 0
+                currentVideo.views || 0
               )
             )
           )

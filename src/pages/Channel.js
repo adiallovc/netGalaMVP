@@ -80,32 +80,16 @@ function Channel() {
     );
   }
 
-  // Like video function
-  const [likedVideos, setLikedVideos] = useState({});
-  
-  const handleLike = (videoId) => {
-    const currentLiked = likedVideos[videoId] || false;
-    
-    // Toggle like state for this video
-    setLikedVideos({
-      ...likedVideos,
-      [videoId]: !currentLiked
-    });
-    
-    // Update selected video likes count
-    if (selectedVideo && selectedVideo.id === videoId) {
-      setSelectedVideo({
-        ...selectedVideo,
-        likes: currentLiked ? selectedVideo.likes - 1 : selectedVideo.likes + 1
-      });
-    }
+  // Simplified functionality without likes
+  const handleVideoAction = () => {
+    console.log('Video action performed');
   };
   
   // Video Modal Component
   const createVideoModal = () => {
     if (!showVideoModal || !selectedVideo) return null;
     
-    const isLiked = likedVideos[selectedVideo.id] || false;
+    // Removed likes functionality
     
     return React.createElement(
       "div",
@@ -182,29 +166,21 @@ function Channel() {
                 "div",
                 { className: "ms-auto" }
               ),
-              // Like button
+              // View count
               React.createElement(
                 "div",
                 { className: "d-flex align-items-center" },
                 React.createElement(
-                  "button",
-                  {
-                    className: "btn btn-sm p-0 me-1",
-                    onClick: () => handleLike(selectedVideo.id),
-                    style: { color: isLiked ? "#ff4757" : "#6c757d" }
-                  },
-                  React.createElement(
-                    "i",
-                    { 
-                      className: isLiked ? "bi bi-hand-thumbs-up-fill" : "bi bi-hand-thumbs-up", 
-                      style: { fontSize: '18px' } 
-                    }
-                  )
+                  "i",
+                  { 
+                    className: "bi bi-eye me-1", 
+                    style: { fontSize: '18px', color: "#6c757d" } 
+                  }
                 ),
                 React.createElement(
                   "span",
-                  { style: { fontSize: '14px' } },
-                  selectedVideo.likes
+                  { style: { fontSize: '14px', color: "#6c757d" } },
+                  selectedVideo.views || 0
                 )
               )
             )
