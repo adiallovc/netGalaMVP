@@ -1,30 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import VideoCarousel from '../components/VideoCarousel';
-// import { getCategories } from '../services/api';
 
 function Home() {
-  const [categories, setCategories] = useState([
-    { id: 'trending', name: 'Trending Videos' },
-    { id: 'music', name: 'Music Videos' },
-    { id: 'tutorials', name: 'Tutorials' }
-  ]);
   const [loading, setLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('trending');
   const [timeFilter, setTimeFilter] = useState('last24hours');
   
   const timeFilters = [
     { id: 'last24hours', name: 'Last 24 Hours' },
     { id: 'alltime', name: 'All Time Videos' }
   ];
-  
-  useEffect(() => {
-    // For now, we'll use the hardcoded categories above instead of fetching
-    // This would be replaced with an API call in a full implementation
-  }, []);
-
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-  };
   
   const handleTimeFilterChange = (e) => {
     setTimeFilter(e.target.value);
@@ -60,29 +44,8 @@ function Home() {
           { className: "col-md-6 mx-auto" },
           React.createElement(
             "div",
-            { className: "d-flex justify-content-center gap-3" },
-            // Category dropdown
-            React.createElement(
-              "select",
-              {
-                className: "form-select",
-                value: selectedCategory || '',
-                onChange: handleCategoryChange,
-                style: {
-                  maxWidth: '200px',
-                  borderColor: '#e0e0e0',
-                  borderRadius: '4px'
-                }
-              },
-              categories.map(category => 
-                React.createElement(
-                  "option",
-                  { key: category.id, value: category.id },
-                  category.name
-                )
-              )
-            ),
-            // Time filter dropdown
+            { className: "d-flex justify-content-center" },
+            // Time filter dropdown only
             React.createElement(
               "select",
               {
@@ -107,7 +70,7 @@ function Home() {
         )
       ),
       React.createElement(VideoCarousel, {
-        categoryId: selectedCategory,
+        categoryId: 'trending', // Default to trending videos
         timeFilter: timeFilter
       })
     )
