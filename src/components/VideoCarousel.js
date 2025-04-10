@@ -260,36 +260,10 @@ function VideoCarousel({ categoryId, timeFilter }) {
               },
               "Follow"
             ),
-            // Likes and comments
+            // Empty div for spacing
             React.createElement(
               "div",
-              { className: "ms-auto" },
-              React.createElement(
-                "button",
-                { className: "btn btn-sm btn-outline-secondary me-2" },
-                React.createElement(
-                  "i",
-                  { 
-                    className: "bi bi-heart", 
-                    style: { fontSize: '16px' }
-                  }
-                ),
-                " ",
-                currentVideo.likes || 0
-              ),
-              React.createElement(
-                "button",
-                { className: "btn btn-sm btn-outline-secondary" },
-                React.createElement(
-                  "i",
-                  { 
-                    className: "bi bi-chat", 
-                    style: { fontSize: '16px' }
-                  }
-                ),
-                " ",
-                currentVideo.comments || 0
-              )
+              { className: "ms-auto" }
             )
           )
         )
