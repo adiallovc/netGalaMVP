@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// import { login, register } from '../services/auth';
+import { login, register } from '../services/auth';
 
 function Auth({ setCurrentUser }) {
   const navigate = useNavigate();
@@ -47,26 +47,38 @@ function Auth({ setCurrentUser }) {
     return true;
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
     
-    // Mock authentication for now
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Create a mock user
-      const user = {
-        id: 'user1',
-        username: username || 'demo_user',
-        email: email
-      };
+    setError('');
+    
+    try {
+      let user;
+      
+      if (isSignUp) {
+        // Register new user
+        user = await register({ username, email, password });
+      } else {
+        // Login existing user
+        user = await login({ email, password });
+      }
+      
+      // Set the current user in the app state
       setCurrentUser(user);
+      
+      // Navigate to the homepage
       navigate('/');
-    }, 1000);
+    } catch (err) {
+      console.error('Authentication error:', err);
+      setError(err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
   
   // Create form inputs based on sign up state

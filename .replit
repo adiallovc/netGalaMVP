@@ -15,6 +15,10 @@ author = "agent"
 task = "workflow.run"
 args = "Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Database Migration"
+
 [[workflows.workflow]]
 name = "Server"
 author = "agent"
@@ -29,6 +33,20 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm install react react-dom react-router-dom axios bootstrap cors express vite @vitejs/plugin-react && npx vite build && node server.js"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Database Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node db/migrate.js"
 
 [deployment]
 run = ["sh", "-c", "npm install react react-dom react-router-dom axios bootstrap cors express vite @vitejs/plugin-react && npx vite build && node server.js"]
