@@ -165,15 +165,48 @@ function Channel() {
             { className: "col-md-4 col-sm-6 mb-4", key: video.id },
             React.createElement(
               "div",
-              { className: "card h-100" },
-              React.createElement(
-                "img",
-                {
-                  src: video.thumbnailUrl,
-                  alt: video.title,
-                  className: "card-img-top",
-                  style: { aspectRatio: '16/9', objectFit: 'cover' }
+              { 
+                className: "card h-100",
+                style: { cursor: 'pointer' },
+                onClick: () => {
+                  // Navigate to home page with this video selected
+                  window.location.href = '/?timeFilter=allTime&videoId=' + video.id;
                 }
+              },
+              React.createElement(
+                "div",
+                { className: "position-relative" },
+                React.createElement(
+                  "img",
+                  {
+                    src: video.thumbnailUrl,
+                    alt: video.title,
+                    className: "card-img-top",
+                    style: { aspectRatio: '16/9', objectFit: 'cover' }
+                  }
+                ),
+                // Play button overlay to indicate it's playable
+                React.createElement(
+                  "div",
+                  {
+                    className: "position-absolute top-50 start-50 translate-middle",
+                    style: { zIndex: 1 }
+                  },
+                  React.createElement(
+                    "div",
+                    {
+                      className: "d-flex align-items-center justify-content-center bg-dark bg-opacity-50 rounded-circle",
+                      style: { width: '50px', height: '50px' }
+                    },
+                    React.createElement(
+                      "i",
+                      {
+                        className: "bi bi-play-fill text-white",
+                        style: { fontSize: '24px' }
+                      }
+                    )
+                  )
+                )
               ),
               React.createElement(
                 "div",
