@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // import { logout } from '../services/auth';
 
 function Navbar({ currentUser }) {
   const navigate = useNavigate();
+  const [showFollowing, setShowFollowing] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -12,6 +13,13 @@ function Navbar({ currentUser }) {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  // Toggle following page view
+  const handleFollowingClick = () => {
+    setShowFollowing(!showFollowing);
+    console.log('Switch to following view');
+    // In a real app, this would navigate or filter content
   };
 
   // Create navigation links
@@ -36,57 +44,82 @@ function Navbar({ currentUser }) {
     );
   };
 
+  // Create Following button
+  const createFollowingButton = () => {
+    return React.createElement(
+      "button",
+      {
+        className: "btn me-3",
+        onClick: handleFollowingClick,
+        style: {
+          backgroundColor: showFollowing ? "#6f42c1" : "transparent",
+          color: showFollowing ? "white" : "#6f42c1",
+          border: "1px solid #6f42c1",
+          fontWeight: 500
+        }
+      },
+      "Following"
+    );
+  };
+
   // Create user dropdown or auth buttons
   const createUserSection = () => {
     if (currentUser) {
       return React.createElement(
-        "div",
-        { className: "dropdown" },
+        React.Fragment,
+        null,
+        // Add the Following button
+        createFollowingButton(),
+        // User dropdown
         React.createElement(
-          "button",
-          {
-            className: "btn btn-light dropdown-toggle d-flex align-items-center",
-            type: "button",
-            id: "userDropdown",
-            "data-bs-toggle": "dropdown",
-            "aria-expanded": "false"
-          },
+          "div",
+          { className: "dropdown" },
           React.createElement(
-            "span",
-            { className: "me-2" },
-            currentUser.username || "User"
-          )
-        ),
-        React.createElement(
-          "ul",
-          { 
-            className: "dropdown-menu dropdown-menu-end", 
-            "aria-labelledby": "userDropdown" 
-          },
-          React.createElement(
-            "li",
-            null,
+            "button",
+            {
+              className: "btn btn-light dropdown-toggle d-flex align-items-center",
+              type: "button",
+              id: "userDropdown",
+              "data-bs-toggle": "dropdown",
+              "aria-expanded": "false"
+            },
             React.createElement(
-              Link,
-              { 
-                className: "dropdown-item", 
-                to: `/profile/${currentUser.id || 'me'}` 
-              },
-              "Profile"
+              "span",
+              { className: "me-2" },
+              currentUser.username || "User"
             )
           ),
           React.createElement(
-            "li",
-            null,
-            React.createElement("hr", { className: "dropdown-divider" })
-          ),
-          React.createElement(
-            "li",
-            null,
+            "ul",
+            { 
+              className: "dropdown-menu dropdown-menu-end", 
+              "aria-labelledby": "userDropdown" 
+            },
             React.createElement(
-              "button",
-              { className: "dropdown-item", onClick: handleLogout },
-              "Log out"
+              "li",
+              null,
+              React.createElement(
+                Link,
+                { 
+                  className: "dropdown-item", 
+                  to: `/profile/${currentUser.id || 'me'}` 
+                },
+                "Profile"
+              )
+            ),
+            React.createElement(
+              "li",
+              null,
+              React.createElement("hr", { className: "dropdown-divider" })
+            ),
+            React.createElement(
+              "li",
+              null,
+              React.createElement(
+                "button",
+                { className: "dropdown-item", onClick: handleLogout },
+                "Log out"
+              )
             )
           )
         )
@@ -158,7 +191,7 @@ function Navbar({ currentUser }) {
         ),
         React.createElement(
           "div",
-          { className: "d-flex" },
+          { className: "d-flex align-items-center" },
           createUserSection()
         )
       )

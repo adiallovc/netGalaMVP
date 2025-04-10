@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import VideoPlayer from './VideoPlayer';
 // import { getVideos } from '../services/videoService';
 
-function VideoCarousel({ categoryId, filter }) {
-  // Sample data for videos
-  const sampleVideos = {
+function VideoCarousel({ categoryId, timeFilter }) {
+  // Sample data for videos with timestamps
+  const allVideos = {
     trending: [
       {
         id: 1,
@@ -16,7 +16,8 @@ function VideoCarousel({ categoryId, filter }) {
         username: 'Creative_AI',
         userAvatar: 'https://i.pravatar.cc/150?img=1',
         likes: 423,
-        comments: 58
+        comments: 58,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString() // 12 hours ago
       },
       {
         id: 2,
@@ -27,7 +28,8 @@ function VideoCarousel({ categoryId, filter }) {
         username: 'Visual_Dreams',
         userAvatar: 'https://i.pravatar.cc/150?img=2',
         likes: 258,
-        comments: 32
+        comments: 32,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString() // 26 hours ago
       }
     ],
     music: [
@@ -40,7 +42,20 @@ function VideoCarousel({ categoryId, filter }) {
         username: 'ElectroBeats',
         userAvatar: 'https://i.pravatar.cc/150?img=3',
         likes: 312,
-        comments: 41
+        comments: 41,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() // 5 hours ago
+      },
+      {
+        id: 5,
+        title: 'Ambient Melodies - Music Visualization',
+        videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+        thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerJoyrides.jpg',
+        userId: 'user5',
+        username: 'AmbientSounds',
+        userAvatar: 'https://i.pravatar.cc/150?img=5',
+        likes: 198,
+        comments: 22,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() // 48 hours ago
       }
     ],
     tutorials: [
@@ -53,7 +68,8 @@ function VideoCarousel({ categoryId, filter }) {
         username: 'TechTutor',
         userAvatar: 'https://i.pravatar.cc/150?img=4',
         likes: 178,
-        comments: 27
+        comments: 27,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString() // 20 hours ago
       }
     ]
   };
@@ -64,17 +80,28 @@ function VideoCarousel({ categoryId, filter }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // Simulate API call with sample data
+    // Simulate API call with sample data and filter by time
     setTimeout(() => {
-      if (sampleVideos[categoryId]) {
-        setVideos(sampleVideos[categoryId]);
+      if (allVideos[categoryId]) {
+        let filteredVideos = [...allVideos[categoryId]];
+        
+        // Filter by time if 'last24hours' is selected
+        if (timeFilter === 'last24hours') {
+          const twentyFourHoursAgo = new Date(Date.now() - 1000 * 60 * 60 * 24);
+          filteredVideos = filteredVideos.filter(video => 
+            new Date(video.timestamp) > twentyFourHoursAgo
+          );
+        }
+        
+        setVideos(filteredVideos);
+        setCurrentIndex(0); // Reset to first video when changing filters
         setLoading(false);
       } else {
-        setVideos(sampleVideos.trending);
+        setVideos([]);
         setLoading(false);
       }
     }, 500);
-  }, [categoryId, filter]);
+  }, [categoryId, timeFilter]);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => 
@@ -147,6 +174,7 @@ function VideoCarousel({ categoryId, filter }) {
       React.createElement(
         "div",
         { className: "col-md-8 mx-auto" },
+        // Video player
         React.createElement(
           "div",
           { className: "position-relative" },
@@ -160,37 +188,37 @@ function VideoCarousel({ categoryId, filter }) {
               username: currentVideo.username,
               userAvatar: currentVideo.userAvatar
             }
-          ),
-          React.createElement(
-            "div",
-            { 
-              className: "position-absolute bottom-0 start-50 translate-middle-x mb-3",
-              style: { zIndex: 10 }
-            },
-            React.createElement(
-              "button",
-              {
-                className: "btn btn-sm",
-                onClick: handleNext,
-                style: {
-                  backgroundColor: '#6f42c1',
-                  color: 'white',
-                  padding: '8px 20px',
-                  borderRadius: '4px',
-                  fontWeight: 500
-                }
-              },
-              "next"
-            )
           )
         ),
+        // Next button (not on the video)
         React.createElement(
           "div",
-          { className: "mt-3" },
+          { className: "d-flex justify-content-center mt-3 mb-2" },
+          React.createElement(
+            "button",
+            {
+              className: "btn",
+              onClick: handleNext,
+              style: {
+                backgroundColor: '#6f42c1',
+                color: 'white',
+                padding: '8px 20px',
+                borderRadius: '4px',
+                fontWeight: 500
+              }
+            },
+            "Next Video"
+          )
+        ),
+        // Video details
+        React.createElement(
+          "div",
+          { className: "mt-2" },
           React.createElement("h5", { className: "mb-2" }, currentVideo.title),
           React.createElement(
             "div",
             { className: "d-flex align-items-center" },
+            // User info
             React.createElement(
               "a",
               { 
@@ -220,6 +248,19 @@ function VideoCarousel({ categoryId, filter }) {
                 )
               )
             ),
+            // Follow button
+            React.createElement(
+              "button",
+              { 
+                className: "btn btn-sm btn-outline-primary ms-3",
+                style: { 
+                  borderColor: '#6f42c1', 
+                  color: '#6f42c1' 
+                }
+              },
+              "Follow"
+            ),
+            // Likes and comments
             React.createElement(
               "div",
               { className: "ms-auto" },
