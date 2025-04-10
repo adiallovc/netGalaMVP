@@ -8,6 +8,7 @@ function VideoCarousel({ categoryId, timeFilter }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     // Fetch videos from the API
@@ -43,6 +44,12 @@ function VideoCarousel({ categoryId, timeFilter }) {
     setCurrentIndex((prevIndex) => 
       prevIndex - 1 < 0 ? videos.length - 1 : prevIndex - 1
     );
+  };
+  
+  const handleFollow = () => {
+    setIsFollowing(!isFollowing);
+    // In a real app, this would make an API call to follow/unfollow
+    console.log(`${isFollowing ? 'Unfollow' : 'Follow'} user: ${currentVideo?.userId}`);
   };
 
   if (loading) {
@@ -156,9 +163,8 @@ function VideoCarousel({ categoryId, timeFilter }) {
                 className: "text-decoration-none",
                 onClick: (e) => {
                   e.preventDefault();
-                  // In a real app, you would navigate to the user's channel page
-                  console.log(`Navigate to profile: ${currentVideo.userId}`);
-                  // Using window.location would be: window.location.href = `/channel/${currentVideo.userId}`;
+                  // Navigate to the user's channel page
+                  window.location.href = `/channel/${currentVideo.userId}`;
                 }
               },
               React.createElement(
@@ -184,18 +190,27 @@ function VideoCarousel({ categoryId, timeFilter }) {
             React.createElement(
               "button",
               { 
-                className: "btn btn-sm btn-outline-primary ms-3",
+                className: isFollowing 
+                  ? "btn btn-sm btn-primary ms-3" 
+                  : "btn btn-sm btn-outline-primary ms-3",
+                onClick: handleFollow,
                 style: { 
+                  backgroundColor: isFollowing ? '#6f42c1' : 'transparent',
                   borderColor: '#6f42c1', 
-                  color: '#6f42c1' 
+                  color: isFollowing ? 'white' : '#6f42c1'
                 }
               },
-              "Follow"
+              isFollowing ? "Following" : "Follow"
             ),
-            // Heart icon with counter 
+            // Empty div for spacing with flex-grow
             React.createElement(
               "div",
-              { className: "d-flex align-items-center ms-3" },
+              { className: "ms-auto" }
+            ),
+            // Heart icon with counter (now aligned to the right)
+            React.createElement(
+              "div",
+              { className: "d-flex align-items-center" },
               React.createElement(
                 "button",
                 { 
@@ -216,11 +231,6 @@ function VideoCarousel({ categoryId, timeFilter }) {
                 { style: { fontSize: '14px' } },
                 currentVideo.likes || 0
               )
-            ),
-            // Empty div for spacing
-            React.createElement(
-              "div",
-              { className: "ms-auto" }
             )
           )
         )
