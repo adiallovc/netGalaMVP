@@ -1,0 +1,160 @@
+/* Global Styles */
+:root {
+  --primary-color: #6f42c1;
+  --secondary-color: #e0e0e0;
+  --light-purple: #f5f3ff;
+  --dark-gray: #343a40;
+  --light-gray: #f8f9fa;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --border-radius: 0.375rem;
+  --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --transition-speed: 0.3s;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  background-color: #fff;
+  line-height: 1.5;
+}
+
+/* Custom button styles */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #5e35b1;
+  border-color: #5e35b1;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Form controls */
+.form-control:focus {
+  border-color: #b794f4;
+  box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+/* Video player styles */
+.video-player-container {
+  position: relative;
+  background-color: #000;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+/* Video card hover effects */
+.card {
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.play-overlay {
+  opacity: 0;
+  transition: opacity var(--transition-speed);
+  background-color: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.card:hover .play-overlay {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .navbar .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .video-carousel-container {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Progress bar */
+.progress-bar {
+  background-color: var(--primary-color);
+}
+
+/* Profile section */
+.profile-picture-container {
+  border: 3px solid var(--primary-color);
+}
+
+/* Custom spinner */
+.spinner-border {
+  border-right-color: transparent;
+}
+
+.spinner-border.text-primary {
+  color: var(--primary-color) !important;
+}
+
+/* Video duration badge */
+.badge.bg-dark {
+  opacity: 0.8;
+}
+
+/* Placeholder text */
+::placeholder {
+  color: #adb5bd !important;
+  opacity: 0.8;
+}
+
+/* File upload areas */
+.audio-upload-area,
+.video-upload-area,
+.thumbnail-upload-area {
+  border: 2px dashed #ced4da;
+  transition: all var(--transition-speed);
+}
+
+.audio-upload-area:hover,
+.video-upload-area:hover,
+.thumbnail-upload-area:hover {
+  border-color: var(--primary-color);
+  background-color: var(--light-purple) !important;
+}
