@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import VideoPlayer from './VideoPlayer';
 import { getVideos } from '../services/video';
 
-function VideoCarousel({ categoryId, timeFilter }) {
+function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     // Fetch videos from the API
@@ -19,7 +20,18 @@ function VideoCarousel({ categoryId, timeFilter }) {
         
         if (data && data.length > 0) {
           setVideos(data);
-          setCurrentIndex(0); // Reset to first video when changing filters
+          
+          // If a target video ID is provided, find its index
+          if (targetVideoId) {
+            const targetIndex = data.findIndex(video => video.id.toString() === targetVideoId.toString());
+            if (targetIndex !== -1) {
+              setCurrentIndex(targetIndex);
+            } else {
+              setCurrentIndex(0);
+            }
+          } else {
+            setCurrentIndex(0); // Reset to first video when changing filters
+          }
         } else {
           setVideos([]);
         }
@@ -32,7 +44,7 @@ function VideoCarousel({ categoryId, timeFilter }) {
     };
     
     fetchVideos();
-  }, [timeFilter]);
+  }, [timeFilter, targetVideoId]);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => 
@@ -50,6 +62,22 @@ function VideoCarousel({ categoryId, timeFilter }) {
     setIsFollowing(!isFollowing);
     // In a real app, this would make an API call to follow/unfollow
     console.log(`${isFollowing ? 'Unfollow' : 'Follow'} user: ${currentVideo?.userId}`);
+  };
+  
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    // In a real app, this would make an API call to like/unlike the video
+    console.log(`${isLiked ? 'Unlike' : 'Like'} video: ${currentVideo?.id}`);
+    
+    // Update videos array with new like count (for demo purposes)
+    const updatedVideos = [...videos];
+    updatedVideos[currentIndex] = {
+      ...currentVideo,
+      likes: isLiked 
+        ? (currentVideo.likes || 1) - 1 
+        : (currentVideo.likes || 0) + 1
+    };
+    setVideos(updatedVideos);
   };
 
   if (loading) {
@@ -215,20 +243,23 @@ function VideoCarousel({ categoryId, timeFilter }) {
                 "button",
                 { 
                   className: "btn btn-sm p-0 me-1",
-                  onClick: () => console.log(`Like video: ${currentVideo.id}`),
-                  style: { color: "#ff4757" }
+                  onClick: handleLike,
+                  style: { color: isLiked ? "#ff4757" : "#6c757d" }
                 },
                 React.createElement(
                   "i",
                   { 
-                    className: "bi bi-heart", 
-                    style: { fontSize: '20px' }
+                    className: isLiked ? "bi bi-heart-fill" : "bi bi-heart", 
+                    style: { fontSize: '22px' }
                   }
                 )
               ),
               React.createElement(
                 "span",
-                { style: { fontSize: '14px' } },
+                { 
+                  style: { fontSize: '14px' },
+                  className: "me-3" // Added right margin for spacing
+                },
                 currentVideo.likes || 0
               )
             )
