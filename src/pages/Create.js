@@ -17,9 +17,17 @@ function Create() {
       setError('Please upload an audio file first');
       return;
     }
-    alert('Video generation functionality will be implemented in the next phase');
-    // Redirect to home for now
-    navigate('/');
+    
+    // For the MVP phase, we'll show an informative message about the API integration
+    setLoading(true);
+    
+    setTimeout(() => {
+      setLoading(false);
+      alert('This feature requires integration with an AI video generation API such as Runway or Pika Labs. In the final implementation, your audio will be combined with AI-generated visuals based on your description.');
+      
+      // For demo purposes, we'll simulate success and redirect
+      navigate('/');
+    }, 1500);
   };
   
   const handleAudioUpload = (e) => {
