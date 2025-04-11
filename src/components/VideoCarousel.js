@@ -3,12 +3,11 @@ import React, { useState, useEffect } from 'react';
 import VideoPlayer from './VideoPlayer';
 import { getVideos } from '../services/video';
 
-function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
+function VideoCarousel({ categoryId, timeFilter, targetVideoId, currentUser, followedUsers = [], handleFollowUser }) {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     // Fetch videos from the API
@@ -46,9 +45,23 @@ function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
   }, [timeFilter, targetVideoId]);
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex + 1 >= videos.length ? 0 : prevIndex + 1
-    );
+    // Generate a random index different from the current one
+    const getRandomIndex = () => {
+      // If there's only one video, we have no choice but to repeat
+      if (videos.length <= 1) return 0;
+      
+      // Generate a random index that's different from the current one
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * videos.length);
+      } while (randomIndex === currentIndex);
+      
+      return randomIndex;
+    };
+    
+    // Set the current index to a random one
+    setCurrentIndex(getRandomIndex());
+    console.log("Showing random video for discovery");
   };
 
   const handlePrevious = () => {
@@ -58,9 +71,23 @@ function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
   };
   
   const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    // In a real app, this would make an API call to follow/unfollow
-    console.log(`${isFollowing ? 'Unfollow' : 'Follow'} user: ${currentVideo?.userId}`);
+    if (!currentUser || !currentVideo) return;
+    
+    // Don't allow following yourself
+    if (currentUser.id === currentVideo.userId) {
+      console.log("Cannot follow yourself");
+      return;
+    }
+    
+    // Determine current following state
+    const isCurrentlyFollowing = followedUsers.includes(currentVideo.userId);
+    console.log(`Currently following ${currentVideo.userId}: ${isCurrentlyFollowing}`);
+    
+    // Toggle follow state using the global handler
+    if (handleFollowUser) {
+      // Call global handler with opposite of current state
+      handleFollowUser(currentVideo.userId, !isCurrentlyFollowing);
+    }
   };
   
   // Removed like functionality
@@ -200,21 +227,22 @@ function VideoCarousel({ categoryId, timeFilter, targetVideoId }) {
               )
             ),
             // Follow button
-            React.createElement(
-              "button",
-              { 
-                className: isFollowing 
-                  ? "btn btn-sm btn-primary ms-3" 
-                  : "btn btn-sm btn-outline-primary ms-3",
-                onClick: handleFollow,
-                style: { 
-                  backgroundColor: isFollowing ? '#6f42c1' : 'transparent',
-                  borderColor: '#6f42c1', 
-                  color: isFollowing ? 'white' : '#6f42c1'
-                }
-              },
-              isFollowing ? "Following" : "Follow"
-            ),
+            currentUser && currentUser.id !== currentVideo.userId ?
+              React.createElement(
+                "button",
+                { 
+                  className: followedUsers.includes(currentVideo.userId)
+                    ? "btn btn-sm btn-primary ms-3" 
+                    : "btn btn-sm btn-outline-primary ms-3",
+                  onClick: handleFollow,
+                  style: { 
+                    backgroundColor: followedUsers.includes(currentVideo.userId) ? '#6f42c1' : 'transparent',
+                    borderColor: '#6f42c1', 
+                    color: followedUsers.includes(currentVideo.userId) ? 'white' : '#6f42c1'
+                  }
+                },
+                followedUsers.includes(currentVideo.userId) ? "Following" : "Follow"
+              ) : null,
             // Empty div for spacing with flex-grow
             React.createElement(
               "div",

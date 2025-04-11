@@ -66,47 +66,55 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
     
     // Short timeout to simulate API call
     setTimeout(() => {
-      let userToDisplay = null;
-      let userVideos = [];
-      let userFollowerCount = 0;
-      let currentlyFollowing = false;
-      
-      // Determine if viewing own profile
-      const isCurrentUserProfile = currentUser && 
-        (currentUser.id === userId || userId === 'me');
-      
-      if (isCurrentUserProfile) {
-        // Show current user's profile
-        console.log("Showing current user's own profile");
-        userToDisplay = { ...currentUser };
-        userVideos = currentUser.videos || [];
-        userFollowerCount = currentUser.followers || 0;
-        // User can't follow themselves
-        currentlyFollowing = false;
-      } else {
-        // Show another user's profile
-        const profileUser = mockUsers[userId] || mockUsers['1'];
-        userToDisplay = { ...profileUser };
-        userVideos = profileUser.videos || [];
-        userFollowerCount = profileUser.followers || 0;
+      try {
+        let userToDisplay = null;
+        let userVideos = [];
+        let userFollowerCount = 0;
+        let currentlyFollowing = false;
         
-        // Check if the current user is following this profile
-        if (currentUser && followedUsers) {
-          console.log("Checking if following user:", profileUser.id);
-          currentlyFollowing = followedUsers.includes(profileUser.id);
+        // Determine if viewing own profile
+        const isCurrentUserProfile = currentUser && 
+          (currentUser.id === userId || userId === 'me');
+        
+        if (isCurrentUserProfile && currentUser) {
+          // Show current user's profile
+          console.log("Showing current user's own profile");
+          userToDisplay = { ...currentUser };
+          userVideos = currentUser.videos || [];
+          userFollowerCount = currentUser.followers || 0;
+          // User can't follow themselves
+          currentlyFollowing = false;
+        } else {
+          // Show another user's profile from mock data
+          const profileUser = mockUsers[userId] || mockUsers['1'];
+          console.log("Showing profile for user:", profileUser.id, profileUser.username);
+          
+          userToDisplay = { ...profileUser };
+          userVideos = profileUser.videos || [];
+          userFollowerCount = profileUser.followers || 0;
+          
+          // Check if the current user is following this profile
+          if (currentUser && followedUsers && followedUsers.length > 0) {
+            console.log("Checking if following user:", profileUser.id);
+            console.log("Current followed users:", followedUsers);
+            currentlyFollowing = followedUsers.includes(profileUser.id);
+            console.log("Is following:", currentlyFollowing);
+          }
         }
+        
+        // Update state with user data
+        setUser(userToDisplay);
+        setVideos(userVideos);
+        setFollowersCount(userFollowerCount);
+        setIsFollowing(currentlyFollowing);
+        
+        // Set following count - how many users the current user follows
+        setFollowingCount(followedUsers ? followedUsers.length : 0);
+      } catch (error) {
+        console.error("Error loading channel data:", error);
+      } finally {
+        setLoading(false);
       }
-      
-      // Update state with user data
-      setUser(userToDisplay);
-      setVideos(userVideos);
-      setFollowersCount(userFollowerCount);
-      setIsFollowing(currentlyFollowing);
-      
-      // Set following count - how many users the current user follows
-      setFollowingCount(followedUsers ? followedUsers.length : 0);
-      
-      setLoading(false);
     }, 500);
   }, [userId, currentUser, followedUsers]);
 
@@ -119,6 +127,7 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
     
     // Toggle follow status
     const newFollowingState = !isFollowing;
+    console.log(`Toggling follow for user ${user.id} to ${newFollowingState}`);
     
     // Update UI immediately for responsive feel
     setIsFollowing(newFollowingState);
@@ -126,7 +135,7 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
     
     // Use global follow handler from App.js
     if (handleFollowUser) {
-      console.log(`Following user ${user.id}: ${newFollowingState}`);
+      console.log(`Calling handleFollowUser for user ${user.id}: ${newFollowingState}`);
       const success = handleFollowUser(user.id, newFollowingState);
       
       // If failed, revert UI changes
@@ -143,6 +152,7 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
     
     // Get list of users who are being followed
     const followedUserIds = followedUsers || [];
+    console.log("Creating following modal with users:", followedUserIds);
     
     // Create a list of followed users
     const followingList = Object.values(mockUsers)
@@ -223,7 +233,7 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
               className: "modal-body p-0",
               style: { maxHeight: '400px', overflowY: 'auto' }
             },
-            followingList.length ? followingList : React.createElement(
+            followingList.length > 0 ? followingList : React.createElement(
               "p",
               { className: "text-center p-3 text-muted" },
               "No following yet"
@@ -480,7 +490,7 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
       React.createElement(
         "div",
         { className: "row" },
-        videos.length > 0 ? 
+        videos && videos.length > 0 ? 
           videos.map(video => 
             React.createElement(
               "div",
@@ -547,7 +557,7 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
                   ),
                   React.createElement(
                     "p",
-                    { className: "card-text text-muted small" },
+                    { className: "card-text text-muted small mt-1" },
                     new Date(video.createdAt).toLocaleDateString()
                   )
                 )
