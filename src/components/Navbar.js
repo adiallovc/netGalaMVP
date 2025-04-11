@@ -107,9 +107,9 @@ function Navbar({ currentUser }) {
                 Link,
                 { 
                   className: "dropdown-item", 
-                  to: `/profile/${currentUser.id || 'me'}` 
+                  to: `/edit-profile/${currentUser.id || 'me'}` 
                 },
-                "Profile"
+                "Edit Profile"
               )
             ),
             React.createElement(
