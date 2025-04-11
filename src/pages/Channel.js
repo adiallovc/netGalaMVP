@@ -4,7 +4,7 @@ import VideoPlayer from '../components/VideoPlayer';
 // import { getUserById } from '../services/auth';
 // import { getVideosByUserId } from '../services/video';
 
-function Channel() {
+function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -16,7 +16,6 @@ function Channel() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
-  const [currentLoggedInUser, setCurrentLoggedInUser] = useState(null);
 
   // Simulated user database - using proper IDs that match URL parameters
   const mockUsers = {
@@ -104,17 +103,7 @@ function Channel() {
     }
   };
   
-  // Load current logged-in user from localStorage on component mount
-  useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem('currentUser');
-      if (savedUser) {
-        setCurrentLoggedInUser(JSON.parse(savedUser));
-      }
-    } catch (error) {
-      console.error("Error retrieving logged-in user:", error);
-    }
-  }, []);
+  // No longer needed as currentUser is passed as prop
   
   useEffect(() => {
     // In a real app, fetch the user and their videos
@@ -138,88 +127,83 @@ function Channel() {
       setVideos(foundUser.videos);
       setFollowersCount(foundUser.followers);
       
-      // Check if we're following this user from localStorage
-      try {
-        const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
-        console.log("Current followed users from localStorage:", followedUsers);
-        console.log("Checking if current user ID is in followed list:", foundUser.id);
-        
-        // Make sure we're checking for exact string match, as IDs are strings
-        const isCurrentlyFollowing = followedUsers.includes(foundUser.id);
-        console.log("Is following?", isCurrentlyFollowing);
-        
-        setIsFollowing(isCurrentlyFollowing);
-        
-        // Count how many users the CURRENT user is following
-        setFollowingCount(followedUsers.length);
-      } catch (error) {
-        console.error('Error checking follow status:', error);
-        setIsFollowing(false);
-        setFollowingCount(0);
-      }
+      // Use the followedUsers array passed as prop
+      console.log("Current followed users from props:", followedUsers);
+      console.log("Checking if current user ID is in followed list:", foundUser.id);
+      
+      // Make sure we're checking for exact string match, as IDs are strings
+      const isCurrentlyFollowing = followedUsers.includes(foundUser.id);
+      console.log("Is following?", isCurrentlyFollowing);
+      
+      setIsFollowing(isCurrentlyFollowing);
+      
+      // Count how many users the CURRENT user is following
+      setFollowingCount(followedUsers.length);
       
       setLoading(false);
     }, 500);
-  }, [userId]);
+  }, [userId, followedUsers]);
 
   const handleFollow = () => {
+    // Get the user ID we're operating on
+    const userIdToFollow = user?.id;
+      
+    if (!userIdToFollow) {
+      console.error('Cannot follow: User ID is undefined');
+      return;
+    }
+    
     // Toggle follow status
     const newFollowingState = !isFollowing;
+    
+    // Update the UI immediately
     setIsFollowing(newFollowingState);
     
     // Update follower count based on the new status
     setFollowersCount(prevCount => newFollowingState ? prevCount + 1 : prevCount - 1);
     
-    // Update following count
-    setFollowingCount(prevCount => newFollowingState ? prevCount + 1 : prevCount - 1);
-    
-    // In a real app, this would make an API call to follow/unfollow
-    // We're storing the follow state in localStorage for persistence across page reloads
-    try {
-      const userIdToFollow = user?.id;
+    // If the App-level handleFollowUser function is available, use it
+    if (handleFollowUser) {
+      console.log(`Using global follow handler for user ${userIdToFollow}, follow=${newFollowingState}`);
+      const success = handleFollowUser(userIdToFollow, newFollowingState);
       
-      if (!userIdToFollow) {
-        console.error('Cannot follow: User ID is undefined');
-        return;
+      if (!success) {
+        // If there was an error, revert UI changes
+        setIsFollowing(!newFollowingState);
+        setFollowersCount(prevCount => !newFollowingState ? prevCount + 1 : prevCount - 1);
       }
-      
-      // Get current list of followed users from localStorage
-      const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
-      
-      if (newFollowingState) {
-        // If we're now following, add to list
-        if (!followedUsers.includes(userIdToFollow)) {
-          followedUsers.push(userIdToFollow);
-          console.log(`Added ${userIdToFollow} to followed users`);
+    } else {
+      // Fallback to local storage handling if global function is not available
+      console.log("Using fallback follow handler");
+      try {
+        // Get current list of followed users from localStorage
+        const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
+        
+        if (newFollowingState) {
+          // If we're now following, add to list
+          if (!followedUsers.includes(userIdToFollow)) {
+            followedUsers.push(userIdToFollow);
+            console.log(`Added ${userIdToFollow} to followed users`);
+          }
+        } else {
+          // If we're now unfollowing, remove from list
+          const index = followedUsers.indexOf(userIdToFollow);
+          if (index > -1) {
+            followedUsers.splice(index, 1);
+            console.log(`Removed ${userIdToFollow} from followed users`);
+          }
         }
-      } else {
-        // If we're now unfollowing, remove from list
-        const index = followedUsers.indexOf(userIdToFollow);
-        if (index > -1) {
-          followedUsers.splice(index, 1);
-          console.log(`Removed ${userIdToFollow} from followed users`);
-        }
+        
+        // Update localStorage immediately
+        localStorage.setItem('followedUsers', JSON.stringify(followedUsers));
+        console.log(`User is now ${newFollowingState ? 'following' : 'not following'} ${userIdToFollow}`);
+        console.log(`New followed users list: ${JSON.stringify(followedUsers)}`);
+      } catch (error) {
+        console.error('Error updating follow status:', error);
+        // Revert UI changes on error
+        setIsFollowing(!newFollowingState);
+        setFollowersCount(prevCount => !newFollowingState ? prevCount + 1 : prevCount - 1);
       }
-      
-      // Update localStorage immediately
-      localStorage.setItem('followedUsers', JSON.stringify(followedUsers));
-      console.log(`User is now ${newFollowingState ? 'following' : 'not following'} ${userIdToFollow}`);
-      console.log(`New followed users list: ${JSON.stringify(followedUsers)}`);
-      
-      // Update global app state - This is a critical fix that ensures other components 
-      // will always see the updated following state
-      window.dispatchEvent(new CustomEvent('followStatusChanged', { 
-        detail: { 
-          userId: userIdToFollow, 
-          following: newFollowingState 
-        } 
-      }));
-      
-      // Force a state update in the UI to reflect the new following status
-      // The key benefit of this approach is that it will immediately update the button state
-      // without requiring a full page refresh
-    } catch (error) {
-      console.error('Error updating follow status:', error);
     }
   };
 
@@ -260,8 +244,8 @@ function Channel() {
   const createFollowingModal = () => {
     if (!showFollowingModal) return null;
     
-    // Get the list of followed user IDs from localStorage
-    const followedUserIds = JSON.parse(localStorage.getItem('followedUsers') || '[]');
+    // Use the followedUsers from props instead of localStorage
+    const followedUserIds = followedUsers || [];
     
     // Create a list of users that this user is following
     const followingList = Object.values(mockUsers)
