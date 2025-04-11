@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import VideoCarousel from '../components/VideoCarousel';
 
-function Home() {
+function Home({ currentUser, followedUsers = [], handleFollowUser }) {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [timeFilter, setTimeFilter] = useState('last24hours');
@@ -100,7 +100,10 @@ function Home() {
       React.createElement(VideoCarousel, {
         categoryId: 'trending', // Default to trending videos
         timeFilter: timeFilter,
-        targetVideoId: targetVideoId
+        targetVideoId: targetVideoId,
+        currentUser: currentUser,
+        followedUsers: followedUsers,
+        handleFollowUser: handleFollowUser
       })
     )
   );
