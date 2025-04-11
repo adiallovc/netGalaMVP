@@ -37,9 +37,23 @@ function App() {
   // Load followed users from localStorage
   useEffect(() => {
     try {
-      const savedFollowedUsers = localStorage.getItem('followedUsers');
-      if (savedFollowedUsers) {
-        setFollowedUsers(JSON.parse(savedFollowedUsers));
+      // First, check if we should reset the followed users
+      // This is a temporary fix to clear any default follows
+      const shouldResetFollows = localStorage.getItem('followsReset') !== 'true';
+      
+      if (shouldResetFollows) {
+        // Clear any existing followed users data
+        localStorage.removeItem('followedUsers');
+        // Mark that we've reset the follows
+        localStorage.setItem('followsReset', 'true');
+        // Initialize with empty array
+        setFollowedUsers([]);
+      } else {
+        // Normal flow - load from localStorage if exists
+        const savedFollowedUsers = localStorage.getItem('followedUsers');
+        if (savedFollowedUsers) {
+          setFollowedUsers(JSON.parse(savedFollowedUsers));
+        }
       }
     } catch (error) {
       console.error("Error retrieving followed users from localStorage:", error);
