@@ -141,9 +141,16 @@ function Channel() {
       // Check if we're following this user from localStorage
       try {
         const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
-        setIsFollowing(followedUsers.includes(foundUser.id));
+        console.log("Current followed users from localStorage:", followedUsers);
+        console.log("Checking if current user ID is in followed list:", foundUser.id);
         
-        // Set the following count based on actually followed users in localStorage
+        // Make sure we're checking for exact string match, as IDs are strings
+        const isCurrentlyFollowing = followedUsers.includes(foundUser.id);
+        console.log("Is following?", isCurrentlyFollowing);
+        
+        setIsFollowing(isCurrentlyFollowing);
+        
+        // Count how many users the CURRENT user is following
         setFollowingCount(followedUsers.length);
       } catch (error) {
         console.error('Error checking follow status:', error);
@@ -194,10 +201,23 @@ function Channel() {
         }
       }
       
-      // Update localStorage
+      // Update localStorage immediately
       localStorage.setItem('followedUsers', JSON.stringify(followedUsers));
       console.log(`User is now ${newFollowingState ? 'following' : 'not following'} ${userIdToFollow}`);
       console.log(`New followed users list: ${JSON.stringify(followedUsers)}`);
+      
+      // Update global app state - This is a critical fix that ensures other components 
+      // will always see the updated following state
+      window.dispatchEvent(new CustomEvent('followStatusChanged', { 
+        detail: { 
+          userId: userIdToFollow, 
+          following: newFollowingState 
+        } 
+      }));
+      
+      // Force a state update in the UI to reflect the new following status
+      // The key benefit of this approach is that it will immediately update the button state
+      // without requiring a full page refresh
     } catch (error) {
       console.error('Error updating follow status:', error);
     }
