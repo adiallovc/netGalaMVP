@@ -32,7 +32,9 @@ function Navbar({ currentUser }) {
     
     // Add channel link that points to user's channel if logged in
     if (currentUser) {
-      links.push({ to: `/channel/${currentUser.id || '1'}`, text: "My Channel" });
+      // Ensure we're using the numeric ID from the logged-in user
+      const parsedId = currentUser.id || '1'; 
+      links.push({ to: `/channel/${parsedId}`, text: "My Channel" });
     } else {
       links.push({ to: "/channels", text: "Channels" });
     }
