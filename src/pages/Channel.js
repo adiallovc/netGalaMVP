@@ -105,9 +105,13 @@ function Channel() {
       try {
         const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
         setIsFollowing(followedUsers.includes(foundUser.id));
+        
+        // Set the following count based on actually followed users in localStorage
+        setFollowingCount(followedUsers.length);
       } catch (error) {
         console.error('Error checking follow status:', error);
         setIsFollowing(false);
+        setFollowingCount(0);
       }
       
       setLoading(false);
@@ -116,32 +120,47 @@ function Channel() {
 
   const handleFollow = () => {
     // Toggle follow status
-    setIsFollowing(!isFollowing);
+    const newFollowingState = !isFollowing;
+    setIsFollowing(newFollowingState);
     
     // Update follower count based on the new status
-    setFollowersCount(prevCount => isFollowing ? prevCount - 1 : prevCount + 1);
+    setFollowersCount(prevCount => newFollowingState ? prevCount + 1 : prevCount - 1);
+    
+    // Update following count
+    setFollowingCount(prevCount => newFollowingState ? prevCount + 1 : prevCount - 1);
     
     // In a real app, this would make an API call to follow/unfollow
     // We're storing the follow state in localStorage for persistence across page reloads
     try {
-      const userId = user?.id || 'user1';
+      const userIdToFollow = user?.id;
+      
+      if (!userIdToFollow) {
+        console.error('Cannot follow: User ID is undefined');
+        return;
+      }
+      
+      // Get current list of followed users from localStorage
       const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
       
-      if (!isFollowing) {
+      if (newFollowingState) {
         // If we're now following, add to list
-        if (!followedUsers.includes(userId)) {
-          followedUsers.push(userId);
+        if (!followedUsers.includes(userIdToFollow)) {
+          followedUsers.push(userIdToFollow);
+          console.log(`Added ${userIdToFollow} to followed users`);
         }
       } else {
         // If we're now unfollowing, remove from list
-        const index = followedUsers.indexOf(userId);
+        const index = followedUsers.indexOf(userIdToFollow);
         if (index > -1) {
           followedUsers.splice(index, 1);
+          console.log(`Removed ${userIdToFollow} from followed users`);
         }
       }
       
+      // Update localStorage
       localStorage.setItem('followedUsers', JSON.stringify(followedUsers));
-      console.log(`User is now ${!isFollowing ? 'following' : 'not following'} ${userId}`);
+      console.log(`User is now ${newFollowingState ? 'following' : 'not following'} ${userIdToFollow}`);
+      console.log(`New followed users list: ${JSON.stringify(followedUsers)}`);
     } catch (error) {
       console.error('Error updating follow status:', error);
     }
@@ -178,6 +197,103 @@ function Channel() {
   // Simplified functionality without likes
   const handleVideoAction = () => {
     console.log('Video action performed');
+  };
+  
+  // Following Modal Component
+  const createFollowingModal = () => {
+    if (!showFollowingModal) return null;
+    
+    // Get the list of followed user IDs from localStorage
+    const followedUserIds = JSON.parse(localStorage.getItem('followedUsers') || '[]');
+    
+    // Create a list of users that this user is following
+    const followingList = Object.values(mockUsers)
+      .filter(u => followedUserIds.includes(u.id)) // Only show users that are being followed
+      .map(followedUser => {
+        return React.createElement(
+          "div",
+          { 
+            className: "d-flex align-items-center p-3 border-bottom",
+            key: followedUser.id,
+            style: { cursor: 'pointer' },
+            onClick: () => {
+              setShowFollowingModal(false);
+              window.location.href = `/channel/${followedUser.id}`;
+            }
+          },
+          // User avatar
+          React.createElement(
+            "img",
+            {
+              src: followedUser.avatar,
+              alt: followedUser.username,
+              className: "rounded-circle me-3",
+              style: { width: '50px', height: '50px', objectFit: 'cover' }
+            }
+          ),
+          // User details
+          React.createElement(
+            "div",
+            { className: "flex-grow-1" },
+            React.createElement(
+              "h6",
+              { className: "mb-0" },
+              followedUser.username
+            ),
+            React.createElement(
+              "p",
+              { className: "mb-0 text-muted small" },
+              `${followedUser.followers} followers`
+            )
+          )
+        );
+      });
+    
+    return React.createElement(
+      "div",
+      {
+        className: "modal fade show",
+        tabIndex: "-1",
+        style: { display: 'block', backgroundColor: 'rgba(0,0,0,0.7)' }
+      },
+      React.createElement(
+        "div",
+        { className: "modal-dialog modal-dialog-centered" },
+        React.createElement(
+          "div",
+          { className: "modal-content" },
+          React.createElement(
+            "div",
+            { className: "modal-header" },
+            React.createElement(
+              "h5",
+              { className: "modal-title" },
+              "Following"
+            ),
+            React.createElement(
+              "button",
+              {
+                type: "button",
+                className: "btn-close",
+                onClick: () => setShowFollowingModal(false)
+              }
+            )
+          ),
+          React.createElement(
+            "div",
+            { 
+              className: "modal-body p-0",
+              style: { maxHeight: '400px', overflowY: 'auto' }
+            },
+            followingList.length ? followingList : React.createElement(
+              "p",
+              { className: "text-center p-3 text-muted" },
+              "No following yet"
+            )
+          )
+        )
+      )
+    );
   };
   
   // Video Modal Component
@@ -290,6 +406,8 @@ function Channel() {
     { className: "channel-page py-4" },
     // Add Video Modal
     createVideoModal(),
+    // Add Following Modal
+    createFollowingModal(),
     React.createElement(
       "div",
       { className: "container" },
@@ -329,6 +447,15 @@ function Channel() {
                   "span",
                   { className: "me-3" },
                   `${followersCount} followers`
+                ),
+                React.createElement(
+                  "span",
+                  { 
+                    className: "me-3 cursor-pointer",
+                    style: { cursor: 'pointer', textDecoration: 'underline' },
+                    onClick: () => setShowFollowingModal(true)
+                  },
+                  `${followingCount} following`
                 ),
                 React.createElement(
                   "span",
