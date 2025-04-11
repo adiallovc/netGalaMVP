@@ -14,21 +14,21 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Comment out the user fetch for now to get the app running
-    // const checkUser = async () => {
-    //   try {
-    //     const user = await getCurrentUser();
-    //     setCurrentUser(user);
-    //   } catch (error) {
-    //     console.error("Error fetching current user:", error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // checkUser();
+    // Use localStorage to persist user session
+    const checkUser = () => {
+      try {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+          setCurrentUser(JSON.parse(savedUser));
+        }
+      } catch (error) {
+        console.error("Error retrieving user from localStorage:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Set loading to false directly for now
-    setLoading(false);
+    checkUser();
   }, []);
 
   if (loading) {

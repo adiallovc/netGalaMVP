@@ -6,26 +6,42 @@ const API_URL = '/api';
 // Register a new user
 export async function register(userData) {
   try {
-    const response = await axios.post(`${API_URL}/users/register`, userData);
-    return response.data;
+    // For the demo, simulate a successful registration
+    // In a real app, this would be an API call
+    const mockUser = {
+      id: 'user' + Math.floor(Math.random() * 1000),
+      username: userData.username,
+      email: userData.email,
+      avatar: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`
+    };
+    
+    // Store in localStorage for persistence
+    localStorage.setItem('currentUser', JSON.stringify(mockUser));
+    
+    return mockUser;
   } catch (error) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.error || 'Registration failed');
-    }
-    throw new Error('Network error during registration');
+    throw new Error('Registration failed: ' + (error.message || 'Unknown error'));
   }
 }
 
 // Login a user
 export async function login(credentials) {
   try {
-    const response = await axios.post(`${API_URL}/users/login`, credentials);
-    return response.data;
+    // For the demo, simulate a successful login
+    // In a real app, this would verify credentials with an API
+    const mockUser = {
+      id: 'user1', // Fixed ID for demo login
+      username: credentials.email.split('@')[0], // Use part of email as username
+      email: credentials.email,
+      avatar: 'https://i.pravatar.cc/150?img=1'
+    };
+    
+    // Store in localStorage for persistence
+    localStorage.setItem('currentUser', JSON.stringify(mockUser));
+    
+    return mockUser;
   } catch (error) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.error || 'Login failed');
-    }
-    throw new Error('Network error during login');
+    throw new Error('Login failed: ' + (error.message || 'Invalid credentials'));
   }
 }
 
@@ -44,7 +60,9 @@ export async function getCurrentUser(userId) {
 
 // Logout (client-side only)
 export function logout() {
-  // In a real app, this might call an API endpoint, invalidate tokens, etc.
-  // For now, we're just doing client-side logout
+  // Clear the user from localStorage
+  localStorage.removeItem('currentUser');
+  
+  // In a real app, this would also call an API endpoint to invalidate tokens
   return Promise.resolve();
 }
