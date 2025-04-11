@@ -12,7 +12,7 @@ function Upload() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Upload functionality will be implemented in the next phase.');
+    alert('Upload functionality is coming in the next development phase. The MVP is focused on AI-generated videos. Please use the Create page to generate videos from your audio.');
     // Redirect to home for now
     navigate('/');
   };
@@ -116,7 +116,7 @@ function Upload() {
                       onChange: (e) => setCategory(e.target.value)
                     },
                     React.createElement("option", { value: "" }, "Select a category"),
-                    React.createElement("option", { value: "time-capsule" }, "Time Capsule"),
+                    React.createElement("option", { value: "other" }, "Other"),
                     React.createElement("option", { value: "music" }, "Music"),
                     React.createElement("option", { value: "gaming" }, "Gaming"),
                     React.createElement("option", { value: "education" }, "Education"),

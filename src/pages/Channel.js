@@ -48,8 +48,36 @@ function Channel() {
   }, [userId]);
 
   const handleFollow = () => {
+    // Toggle follow status
     setIsFollowing(!isFollowing);
+    
+    // Update follower count based on the new status
     setFollowersCount(prevCount => isFollowing ? prevCount - 1 : prevCount + 1);
+    
+    // In a real app, this would make an API call to follow/unfollow
+    // We're storing the follow state in localStorage for persistence across page reloads
+    try {
+      const userId = user?.id || 'user1';
+      const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
+      
+      if (!isFollowing) {
+        // If we're now following, add to list
+        if (!followedUsers.includes(userId)) {
+          followedUsers.push(userId);
+        }
+      } else {
+        // If we're now unfollowing, remove from list
+        const index = followedUsers.indexOf(userId);
+        if (index > -1) {
+          followedUsers.splice(index, 1);
+        }
+      }
+      
+      localStorage.setItem('followedUsers', JSON.stringify(followedUsers));
+      console.log(`User is now ${!isFollowing ? 'following' : 'not following'} ${userId}`);
+    } catch (error) {
+      console.error('Error updating follow status:', error);
+    }
   };
 
   if (loading) {
