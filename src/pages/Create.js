@@ -6,14 +6,40 @@ function Create() {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState('');
   const [title, setTitle] = useState('');
+  const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [audioFileName, setAudioFileName] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!audioFile) {
+      setError('Please upload an audio file first');
+      return;
+    }
     alert('Video generation functionality will be implemented in the next phase');
     // Redirect to home for now
     navigate('/');
+  };
+  
+  const handleAudioUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file type
+      if (!file.type.includes('audio/')) {
+        setError('Please upload an audio file (MP3, WAV, etc.)');
+        return;
+      }
+      // Check file size (limit to 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Audio file must be less than 10MB');
+        return;
+      }
+      
+      setAudioFile(file);
+      setAudioFileName(file.name);
+      setError('');
+    }
   };
 
   // Create the page structure using React.createElement
@@ -54,6 +80,53 @@ function Create() {
               React.createElement(
                 "form",
                 { onSubmit: handleSubmit },
+                // Audio upload
+                React.createElement(
+                  "div",
+                  { className: "mb-4" },
+                  React.createElement(
+                    "label",
+                    { htmlFor: "audio", className: "form-label fw-bold" },
+                    "Upload Audio"
+                  ),
+                  React.createElement(
+                    "div",
+                    { className: "d-flex align-items-center" },
+                    React.createElement(
+                      "div",
+                      { className: "d-grid flex-grow-1 me-2" },
+                      React.createElement(
+                        "label",
+                        { 
+                          htmlFor: "audio-upload",
+                          className: "btn btn-outline-primary",
+                          style: { borderColor: '#6f42c1', color: '#6f42c1' }
+                        },
+                        "Upload Audio"
+                      ),
+                      React.createElement(
+                        "input",
+                        {
+                          type: "file",
+                          id: "audio-upload",
+                          accept: "audio/*",
+                          onChange: handleAudioUpload,
+                          className: "d-none"
+                        }
+                      )
+                    ),
+                    audioFileName && React.createElement(
+                      "div",
+                      { className: "ms-2 text-truncate", style: { maxWidth: "200px" } },
+                      audioFileName
+                    )
+                  ),
+                  React.createElement(
+                    "small",
+                    { className: "text-muted d-block mt-1" },
+                    "Supported formats: MP3, WAV, M4A. Maximum size: 10MB"
+                  )
+                ),
                 // Title field
                 React.createElement(
                   "div",

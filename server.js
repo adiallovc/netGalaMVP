@@ -134,12 +134,14 @@ app.get('/api/videos', async (req, res) => {
     const allVideos = [
       {
         id: '1',
-        title: 'Time Capsule - AI Generated Music Video',
+        title: 'Other - AI Generated Music Video',
         description: 'An AI-generated music video based on audio input',
         videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
         userId: '1',
         username: 'Creative_AI',
+        userAvatar: 'https://i.pravatar.cc/300?img=1',
+        views: 1254,
         timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString() // 12 hours ago
       },
       {
@@ -150,7 +152,45 @@ app.get('/api/videos', async (req, res) => {
         thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg',
         userId: '2',
         username: 'Visual_Dreams',
+        userAvatar: 'https://i.pravatar.cc/300?img=2',
+        views: 892,
         timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString() // 26 hours ago
+      },
+      {
+        id: '3',
+        title: 'Neon City - Electronic Visualization',
+        description: 'A futuristic neon cityscape visualization',
+        videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg',
+        userId: '3',
+        username: 'Neon_Artist',
+        userAvatar: 'https://i.pravatar.cc/300?img=3',
+        views: 745,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() // 4 hours ago
+      },
+      {
+        id: '4',
+        title: 'Abstract Patterns - Meditative Journey',
+        description: 'Calming abstract patterns for meditation',
+        videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+        thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg',
+        userId: '1',
+        username: 'Creative_AI',
+        userAvatar: 'https://i.pravatar.cc/300?img=1',
+        views: 1124,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString() // 8 hours ago
+      },
+      {
+        id: '5',
+        title: 'Nature Sounds - Visual Interpretation',
+        description: 'Visual patterns generated from nature sounds',
+        videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+        thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerFun.jpg',
+        userId: '2',
+        username: 'Visual_Dreams',
+        userAvatar: 'https://i.pravatar.cc/300?img=2',
+        views: 578,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 22).toISOString() // 22 hours ago
       }
     ];
     
