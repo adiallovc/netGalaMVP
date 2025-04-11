@@ -30,11 +30,9 @@ function Navbar({ currentUser }) {
       { to: "/create", text: "Create" }
     ];
     
-    // Add channel link that points to user's channel if logged in
+    // Add following link if user is logged in
     if (currentUser) {
-      // Ensure we're using the numeric ID from the logged-in user
-      const parsedId = currentUser.id || '1'; 
-      links.push({ to: `/channel/${parsedId}`, text: "My Channel" });
+      links.push({ to: "/following", text: "Following" });
     } else {
       links.push({ to: "/channels", text: "Channels" });
     }
@@ -102,6 +100,18 @@ function Navbar({ currentUser }) {
               className: "dropdown-menu dropdown-menu-end", 
               "aria-labelledby": "userDropdown" 
             },
+            React.createElement(
+              "li",
+              null,
+              React.createElement(
+                Link,
+                { 
+                  className: "dropdown-item", 
+                  to: `/channel/${currentUser.id || '1'}` 
+                },
+                "My Profile"
+              )
+            ),
             React.createElement(
               "li",
               null,

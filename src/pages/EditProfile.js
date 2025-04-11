@@ -12,6 +12,8 @@ function EditProfile({ currentUser, setCurrentUser }) {
     bio: '',
     avatar: ''
   });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState('');
   
   useEffect(() => {
     // In a real app, fetch the user's current data
@@ -25,6 +27,7 @@ function EditProfile({ currentUser, setCurrentUser }) {
         bio: currentUser.bio || '',
         avatar: currentUser.avatar || ''
       });
+      setPreviewImage(currentUser.avatar || '');
       setLoading(false);
     } else {
       // Try to get user from localStorage as fallback
@@ -38,6 +41,7 @@ function EditProfile({ currentUser, setCurrentUser }) {
             bio: storedUser.bio || '',
             avatar: storedUser.avatar || ''
           });
+          setPreviewImage(storedUser.avatar || '');
         } else {
           console.error('No user found in local storage');
           // Redirect to login if no user found
@@ -59,17 +63,40 @@ function EditProfile({ currentUser, setCurrentUser }) {
     }));
   };
   
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setSelectedFile(file);
+    
+    // Create a preview of the selected image
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result);
+      // Also update the avatar in formData
+      setFormData(prev => ({
+        ...prev,
+        avatar: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // In a real app, this would send the update to an API
-    // For now, just update the user in localStorage
+    // In a real app, this would upload the file to a server
+    // and then update the user profile with the URL
     try {
+      // If we have a file selected, use the preview image data URL
+      // Otherwise use the existing avatar URL
+      const avatarUrl = selectedFile ? previewImage : formData.avatar;
+      
       const updatedUser = {
         ...user,
         username: formData.username,
         bio: formData.bio,
-        avatar: formData.avatar
+        avatar: avatarUrl
       };
       
       // Update localStorage
@@ -154,21 +181,49 @@ function EditProfile({ currentUser, setCurrentUser }) {
               React.createElement(
                 "img",
                 {
-                  src: formData.avatar,
+                  src: previewImage || formData.avatar,
                   alt: formData.username,
-                  className: "rounded-circle",
+                  className: "rounded-circle mb-3",
                   style: { width: '120px', height: '120px', objectFit: 'cover' }
                 }
+              ),
+              React.createElement(
+                "div",
+                { className: "d-flex justify-content-center" },
+                React.createElement(
+                  "label",
+                  { 
+                    htmlFor: "photo-upload",
+                    className: "btn btn-outline-primary",
+                    style: { 
+                      backgroundColor: "transparent",
+                      color: "#6f42c1",
+                      borderColor: "#6f42c1",
+                      cursor: "pointer"
+                    }
+                  },
+                  "Upload New Photo"
+                ),
+                React.createElement(
+                  "input",
+                  {
+                    type: "file",
+                    id: "photo-upload",
+                    accept: "image/*",
+                    onChange: handleFileChange,
+                    style: { display: "none" }
+                  }
+                )
               )
             ),
-            // Avatar URL field
+            // Avatar URL field (as fallback option)
             React.createElement(
               "div",
               { className: "mb-3" },
               React.createElement(
                 "label",
                 { htmlFor: "avatar", className: "form-label" },
-                "Profile Picture URL"
+                "Or use Profile Picture URL"
               ),
               React.createElement(
                 "input",
@@ -185,13 +240,7 @@ function EditProfile({ currentUser, setCurrentUser }) {
               React.createElement(
                 "div",
                 { className: "form-text" },
-                "Enter a URL to an image (https://...). For testing, try using ",
-                React.createElement(
-                  "code",
-                  null,
-                  "https://i.pravatar.cc/150?img=X"
-                ),
-                " where X is a number 1-70."
+                "Enter a URL to an image (https://...) if you prefer to use a URL instead of uploading."
               )
             ),
             // Username field
