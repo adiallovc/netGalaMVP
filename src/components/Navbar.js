@@ -24,12 +24,19 @@ function Navbar({ currentUser }) {
 
   // Create navigation links
   const createNavLinks = () => {
-    const links = [
+    let links = [
       { to: "/", text: "Discover" },
       { to: "/upload", text: "Upload" },
-      { to: "/create", text: "Create" },
-      { to: "/channel", text: "Channel" }
+      { to: "/create", text: "Create" }
     ];
+    
+    // Add channel link that points to user's channel if logged in
+    if (currentUser) {
+      links.push({ to: `/channel/${currentUser.id || '1'}`, text: "My Channel" });
+      links.push({ to: `/following/${currentUser.id || '1'}`, text: "Following" });
+    } else {
+      links.push({ to: "/channels", text: "Channels" });
+    }
 
     return links.map((link, index) => 
       React.createElement(
@@ -44,21 +51,21 @@ function Navbar({ currentUser }) {
     );
   };
 
-  // Create Following button
-  const createFollowingButton = () => {
+  // Create a link to Following page instead of a button
+  const createFollowingLink = () => {
     return React.createElement(
-      "button",
+      Link,
       {
         className: "btn me-3",
-        onClick: handleFollowingClick,
+        to: `/following/${currentUser?.id || '1'}`,
         style: {
-          backgroundColor: showFollowing ? "#6f42c1" : "transparent",
-          color: showFollowing ? "white" : "#6f42c1",
+          backgroundColor: "transparent",
+          color: "#6f42c1",
           border: "1px solid #6f42c1",
           fontWeight: 500
         }
       },
-      "Following"
+      "My Following"
     );
   };
 
@@ -68,8 +75,7 @@ function Navbar({ currentUser }) {
       return React.createElement(
         React.Fragment,
         null,
-        // Add the Following button
-        createFollowingButton(),
+        // No button here, we've moved it to the navigation links
         // User dropdown
         React.createElement(
           "div",
