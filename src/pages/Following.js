@@ -370,20 +370,56 @@ function Following({ currentUser, followedUsers = [], handleFollowUser }) {
                     ),
                     React.createElement(
                       "div",
-                      { className: "d-flex align-items-center mt-2" },
-                      React.createElement(
-                        "img",
-                        {
-                          src: video.userAvatar,
-                          alt: video.username,
-                          className: "rounded-circle me-2",
-                          style: { width: '24px', height: '24px', objectFit: 'cover' }
+                      { 
+                        className: "d-flex align-items-center justify-content-between mt-2",
+                        onClick: (e) => {
+                          e.stopPropagation(); // Prevent video modal from opening
                         }
-                      ),
+                      },
+                      // Left side - user info
                       React.createElement(
-                        "span",
-                        { className: "text-muted small" },
-                        video.username
+                        "div",
+                        { 
+                          className: "d-flex align-items-center",
+                          style: { cursor: 'pointer' },
+                          onClick: () => {
+                            window.location = `/channel/${video.userId}`;
+                          }
+                        },
+                        React.createElement(
+                          "img",
+                          {
+                            src: video.userAvatar,
+                            alt: video.username,
+                            className: "rounded-circle me-2",
+                            style: { width: '24px', height: '24px', objectFit: 'cover' }
+                          }
+                        ),
+                        React.createElement(
+                          "span",
+                          { className: "text-muted small" },
+                          video.username
+                        )
+                      ),
+                      // Right side - unfollow button
+                      React.createElement(
+                        "button",
+                        {
+                          className: "btn btn-sm btn-primary",
+                          style: { 
+                            backgroundColor: '#6f42c1',
+                            borderColor: '#6f42c1',
+                            fontSize: '0.7rem',
+                            padding: '0.2rem 0.5rem'
+                          },
+                          onClick: (e) => {
+                            e.stopPropagation();
+                            if (handleFollowUser) {
+                              handleFollowUser(video.userId, false);
+                            }
+                          }
+                        },
+                        "Following"
                       )
                     ),
                     React.createElement(
