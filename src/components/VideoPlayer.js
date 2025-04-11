@@ -93,27 +93,24 @@ function VideoPlayer({ videoUrl, thumbnail, title, userId, username, userAvatar 
     return null;
   };
 
-  // Create the user info overlay
-  const createUserInfo = () => {
-    if (userAvatar) {
-      return React.createElement(
-        "div",
+  // Create watermark overlay with netGala logo
+  const createWatermark = () => {
+    return React.createElement(
+      "div",
+      {
+        className: "position-absolute end-0 top-0 m-3",
+        style: { zIndex: 3, opacity: 0.7 }
+      },
+      React.createElement(
+        "img",
         {
-          className: "position-absolute start-0 bottom-0 m-3 d-flex align-items-center",
-          style: { zIndex: 3 }
-        },
-        React.createElement(
-          "img",
-          {
-            src: userAvatar,
-            alt: username,
-            className: "rounded-circle me-2",
-            style: { width: '40px', height: '40px', objectFit: 'cover' }
-          }
-        )
-      );
-    }
-    return null;
+          src: "/images/netgala-logo.png",
+          alt: "netGala",
+          className: "rounded-circle",
+          style: { width: '40px', height: '40px', objectFit: 'cover' }
+        }
+      )
+    );
   };
 
   // Create video controls element
@@ -262,8 +259,8 @@ function VideoPlayer({ videoUrl, thumbnail, title, userId, username, userAvatar 
     ),
     // Video controls
     createVideoControls(),
-    // User info overlay
-    createUserInfo()
+    // netGala watermark
+    createWatermark()
   );
 }
 
