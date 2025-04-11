@@ -33,7 +33,6 @@ function Navbar({ currentUser }) {
     // Add channel link that points to user's channel if logged in
     if (currentUser) {
       links.push({ to: `/channel/${currentUser.id || '1'}`, text: "My Channel" });
-      links.push({ to: `/following/${currentUser.id || '1'}`, text: "Following" });
     } else {
       links.push({ to: "/channels", text: "Channels" });
     }

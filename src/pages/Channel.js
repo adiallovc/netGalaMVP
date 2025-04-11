@@ -11,21 +11,19 @@ function Channel() {
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
 
-  useEffect(() => {
-    // In a real app, fetch the user and their videos
-    // For now, use mock data
-    setTimeout(() => {
-      setUser({
-        id: userId || 'user1',
-        username: 'Channel Creator',
-        avatar: 'https://i.pravatar.cc/150?img=1',
-        bio: 'Creating awesome AI-generated music videos'
-      });
-      
-      setVideos([
+  // Simulated user database
+  const mockUsers = {
+    'user1': {
+      id: 'user1',
+      username: 'Channel Creator',
+      avatar: 'https://i.pravatar.cc/150?img=1',
+      bio: 'Creating awesome AI-generated music videos',
+      videos: [
         {
           id: 1,
           title: 'AI Music Video - Electronic',
@@ -40,9 +38,78 @@ function Channel() {
           views: 892,
           createdAt: new Date().toISOString()
         }
-      ]);
+      ],
+      followers: 124
+    },
+    'user2': {
+      id: 'user2',
+      username: 'Neon_Artist',
+      avatar: 'https://i.pravatar.cc/150?img=2',
+      bio: 'Creating stunning neon visualizations',
+      videos: [
+        {
+          id: 3,
+          title: 'Neon Dreams',
+          thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg',
+          views: 2045,
+          createdAt: new Date().toISOString()
+        }
+      ],
+      followers: 247
+    },
+    'user3': {
+      id: 'user3',
+      username: 'Creative_AI',
+      avatar: 'https://i.pravatar.cc/150?img=3',
+      bio: 'AI-powered creative content',
+      videos: [
+        {
+          id: 4,
+          title: 'AI Art Exhibition',
+          thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg',
+          views: 1839,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 5,
+          title: 'The Future of Creativity',
+          thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerFun.jpg',
+          views: 1257,
+          createdAt: new Date().toISOString()
+        }
+      ],
+      followers: 352
+    }
+  };
+  
+  useEffect(() => {
+    // In a real app, fetch the user and their videos
+    // For now, use mock data
+    setLoading(true);
+    
+    setTimeout(() => {
+      // Check if the user exists in our mock database
+      const foundUser = mockUsers[userId] || mockUsers['user1'];
       
-      setFollowersCount(124);
+      setUser({
+        id: foundUser.id,
+        username: foundUser.username,
+        avatar: foundUser.avatar,
+        bio: foundUser.bio
+      });
+      
+      setVideos(foundUser.videos);
+      setFollowersCount(foundUser.followers);
+      
+      // Check if we're following this user from localStorage
+      try {
+        const followedUsers = JSON.parse(localStorage.getItem('followedUsers') || '[]');
+        setIsFollowing(followedUsers.includes(foundUser.id));
+      } catch (error) {
+        console.error('Error checking follow status:', error);
+        setIsFollowing(false);
+      }
+      
       setLoading(false);
     }, 500);
   }, [userId]);
