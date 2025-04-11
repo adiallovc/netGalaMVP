@@ -112,37 +112,63 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
     console.log("Loading channel with userId:", userId);
     
     setTimeout(() => {
-      // Check if the user exists in our mock database
-      // If userId doesn't exist in mockUsers, use id 1 as fallback
-      const foundUser = mockUsers[userId] || mockUsers['1'];
-      console.log("Found user:", foundUser.id, foundUser.username);
+      // Check if this is the current user's profile
+      const isOwnProfile = currentUser && (currentUser.id === userId || userId === 'me');
       
-      setUser({
-        id: foundUser.id,
-        username: foundUser.username,
-        avatar: foundUser.avatar,
-        bio: foundUser.bio
-      });
+      if (isOwnProfile && currentUser) {
+        // Use the current user's information for their own profile
+        console.log("Showing current user's profile:", currentUser.username);
+        
+        // Create an empty video array or use existing videos if they have any
+        const userVideos = currentUser.videos || [];
+        
+        setUser({
+          id: currentUser.id,
+          username: currentUser.username,
+          avatar: currentUser.avatar,
+          bio: currentUser.bio
+        });
+        
+        setVideos(userVideos);
+        setFollowersCount(currentUser.followers || 0);
+      } else {
+        // Otherwise, show the requested user's profile from mock data
+        const foundUser = mockUsers[userId] || mockUsers['1'];
+        console.log("Found user:", foundUser.id, foundUser.username);
+        
+        setUser({
+          id: foundUser.id,
+          username: foundUser.username,
+          avatar: foundUser.avatar,
+          bio: foundUser.bio
+        });
+        
+        setVideos(foundUser.videos);
+        setFollowersCount(foundUser.followers);
+      }
       
-      setVideos(foundUser.videos);
-      setFollowersCount(foundUser.followers);
-      
-      // Use the followedUsers array passed as prop
-      console.log("Current followed users from props:", followedUsers);
-      console.log("Checking if current user ID is in followed list:", foundUser.id);
-      
-      // Make sure we're checking for exact string match, as IDs are strings
-      const isCurrentlyFollowing = followedUsers.includes(foundUser.id);
-      console.log("Is following?", isCurrentlyFollowing);
-      
-      setIsFollowing(isCurrentlyFollowing);
+      if (isOwnProfile) {
+        // User can't follow themselves
+        console.log("This is the current user's own profile");
+        setIsFollowing(false);
+      } else {
+        // Check if following this user
+        console.log("Current followed users from props:", followedUsers);
+        console.log("Checking if user ID is in followed list:", foundUser.id);
+        
+        // Make sure we're checking for exact string match, as IDs are strings
+        const isCurrentlyFollowing = followedUsers.includes(foundUser.id);
+        console.log("Is following?", isCurrentlyFollowing);
+        
+        setIsFollowing(isCurrentlyFollowing);
+      }
       
       // Count how many users the CURRENT user is following
       setFollowingCount(followedUsers.length);
       
       setLoading(false);
     }, 500);
-  }, [userId, followedUsers]);
+  }, [userId, followedUsers, currentUser]);
 
   const handleFollow = () => {
     // Get the user ID we're operating on
@@ -507,21 +533,36 @@ function Channel({ currentUser, followedUsers = [], handleFollowUser }) {
                   `${videos.length} videos`
                 )
               ),
-              React.createElement(
-                "button",
-                {
-                  className: isFollowing 
-                    ? "btn btn-primary" 
-                    : "btn btn-outline-primary",
-                  onClick: handleFollow,
-                  style: { 
-                    backgroundColor: isFollowing ? '#6f42c1' : 'transparent',
-                    borderColor: '#6f42c1',
-                    color: isFollowing ? 'white' : '#6f42c1'
-                  }
-                },
-                isFollowing ? "Following" : "Follow"
-              )
+              // Only show follow button if this is not the current user's profile
+              currentUser && currentUser.id === user.id 
+              ? React.createElement(
+                  Link,
+                  { 
+                    to: `/edit-profile/${user.id}`,
+                    className: "btn btn-outline-primary",
+                    style: { 
+                      backgroundColor: 'transparent',
+                      borderColor: '#6f42c1',
+                      color: '#6f42c1'
+                    }
+                  },
+                  "Edit Profile"
+                )
+              : React.createElement(
+                  "button",
+                  {
+                    className: isFollowing 
+                      ? "btn btn-primary" 
+                      : "btn btn-outline-primary",
+                    onClick: handleFollow,
+                    style: { 
+                      backgroundColor: isFollowing ? '#6f42c1' : 'transparent',
+                      borderColor: '#6f42c1',
+                      color: isFollowing ? 'white' : '#6f42c1'
+                    }
+                  },
+                  isFollowing ? "Following" : "Follow"
+                )
             )
           ),
           user.bio && React.createElement(
