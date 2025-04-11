@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import VideoPlayer from '../components/VideoPlayer';
 // import { getUserById } from '../services/auth';
 // import { getVideosByUserId } from '../services/video';
 
 function Channel() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,11 +16,12 @@ function Channel() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [currentLoggedInUser, setCurrentLoggedInUser] = useState(null);
 
-  // Simulated user database
+  // Simulated user database - using proper IDs that match URL parameters
   const mockUsers = {
-    'user1': {
-      id: 'user1',
+    '1': {
+      id: '1',
       username: 'Channel Creator',
       avatar: 'https://i.pravatar.cc/150?img=1',
       bio: 'Creating awesome AI-generated music videos',
@@ -28,21 +30,29 @@ function Channel() {
           id: 1,
           title: 'AI Music Video - Electronic',
           thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+          videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
           views: 1254,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          userId: '1',
+          username: 'Channel Creator',
+          userAvatar: 'https://i.pravatar.cc/150?img=1'
         },
         {
           id: 2,
           title: 'Landscape Visualizer Demo',
           thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg',
+          videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
           views: 892,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          userId: '1',
+          username: 'Channel Creator',
+          userAvatar: 'https://i.pravatar.cc/150?img=1'
         }
       ],
       followers: 124
     },
-    'user2': {
-      id: 'user2',
+    '2': {
+      id: '2',
       username: 'Neon_Artist',
       avatar: 'https://i.pravatar.cc/150?img=2',
       bio: 'Creating stunning neon visualizations',
@@ -51,14 +61,18 @@ function Channel() {
           id: 3,
           title: 'Neon Dreams',
           thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg',
+          videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
           views: 2045,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          userId: '2',
+          username: 'Neon_Artist',
+          userAvatar: 'https://i.pravatar.cc/150?img=2'
         }
       ],
       followers: 247
     },
-    'user3': {
-      id: 'user3',
+    '3': {
+      id: '3',
       username: 'Creative_AI',
       avatar: 'https://i.pravatar.cc/150?img=3',
       bio: 'AI-powered creative content',
@@ -67,20 +81,40 @@ function Channel() {
           id: 4,
           title: 'AI Art Exhibition',
           thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg',
+          videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
           views: 1839,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          userId: '3',
+          username: 'Creative_AI',
+          userAvatar: 'https://i.pravatar.cc/150?img=3'
         },
         {
           id: 5,
           title: 'The Future of Creativity',
           thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerFun.jpg',
+          videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
           views: 1257,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          userId: '3',
+          username: 'Creative_AI',
+          userAvatar: 'https://i.pravatar.cc/150?img=3'
         }
       ],
       followers: 352
     }
   };
+  
+  // Load current logged-in user from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        setCurrentLoggedInUser(JSON.parse(savedUser));
+      }
+    } catch (error) {
+      console.error("Error retrieving logged-in user:", error);
+    }
+  }, []);
   
   useEffect(() => {
     // In a real app, fetch the user and their videos
@@ -90,8 +124,8 @@ function Channel() {
     
     setTimeout(() => {
       // Check if the user exists in our mock database
-      // If userId doesn't exist in mockUsers, use user1 as fallback
-      const foundUser = mockUsers[userId] || mockUsers['user1'];
+      // If userId doesn't exist in mockUsers, use id 1 as fallback
+      const foundUser = mockUsers[userId] || mockUsers['1'];
       console.log("Found user:", foundUser.id, foundUser.username);
       
       setUser({
