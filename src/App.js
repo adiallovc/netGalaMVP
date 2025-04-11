@@ -7,6 +7,7 @@ import Create from './pages/Create';
 import Channel from './pages/Channel';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
+import Following from './pages/Following';
 import Auth from './pages/Auth';
 // import { getCurrentUser } from './services/auth';
 
@@ -180,11 +181,10 @@ function App() {
           element: React.createElement(
             ProtectedRoute,
             null,
-            React.createElement(Home, { 
+            React.createElement(Following, { 
               currentUser: currentUser,
               followedUsers: followedUsers,
-              handleFollowUser: handleFollowUser,
-              showOnlyFollowed: true 
+              handleFollowUser: handleFollowUser
             })
           )
         }),
