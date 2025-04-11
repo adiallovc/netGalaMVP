@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
-function EditProfile() {
+function EditProfile({ currentUser, setCurrentUser }) {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -16,26 +17,39 @@ function EditProfile() {
     // In a real app, fetch the user's current data
     setLoading(true);
     
-    // Try to get user from localStorage
-    try {
-      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      
-      if (currentUser && currentUser.id) {
-        setUser(currentUser);
-        setFormData({
-          username: currentUser.username || '',
-          bio: currentUser.bio || '',
-          avatar: currentUser.avatar || ''
-        });
-      } else {
-        console.error('No user found in local storage');
+    // Use passed currentUser first, fall back to localStorage only if needed
+    if (currentUser && currentUser.id) {
+      setUser(currentUser);
+      setFormData({
+        username: currentUser.username || '',
+        bio: currentUser.bio || '',
+        avatar: currentUser.avatar || ''
+      });
+      setLoading(false);
+    } else {
+      // Try to get user from localStorage as fallback
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        
+        if (storedUser && storedUser.id) {
+          setUser(storedUser);
+          setFormData({
+            username: storedUser.username || '',
+            bio: storedUser.bio || '',
+            avatar: storedUser.avatar || ''
+          });
+        } else {
+          console.error('No user found in local storage');
+          // Redirect to login if no user found
+          navigate('/auth');
+        }
+      } catch (error) {
+        console.error('Error retrieving user from localStorage:', error);
       }
-    } catch (error) {
-      console.error('Error retrieving user from localStorage:', error);
+      
+      setLoading(false);
     }
-    
-    setLoading(false);
-  }, [userId]);
+  }, [userId, currentUser, navigate]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,10 +72,22 @@ function EditProfile() {
         avatar: formData.avatar
       };
       
+      // Update localStorage
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      
+      // Update component state
       setUser(updatedUser);
       
+      // Update parent component state if setCurrentUser is passed
+      if (setCurrentUser) {
+        setCurrentUser(updatedUser);
+      }
+      
+      // Show success message
       alert('Profile updated successfully!');
+      
+      // Navigate back to the user's channel page
+      navigate(`/channel/${user.id}`);
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');
