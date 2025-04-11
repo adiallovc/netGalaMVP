@@ -6,6 +6,7 @@ import Upload from './pages/Upload';
 import Create from './pages/Create';
 import Channel from './pages/Channel';
 import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
 import Auth from './pages/Auth';
 // import { getCurrentUser } from './services/auth';
 
@@ -93,6 +94,14 @@ function App() {
         React.createElement(Route, { 
           path: "/profile/:userId", 
           element: React.createElement(Profile, { currentUser: currentUser }) 
+        }),
+        React.createElement(Route, {
+          path: "/edit-profile/:userId",
+          element: React.createElement(
+            ProtectedRoute,
+            null,
+            React.createElement(EditProfile, { currentUser: currentUser, setCurrentUser: setCurrentUser })
+          )
         }),
         React.createElement(Route, { 
           path: "*", 

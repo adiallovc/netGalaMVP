@@ -86,10 +86,13 @@ function Channel() {
     // In a real app, fetch the user and their videos
     // For now, use mock data
     setLoading(true);
+    console.log("Loading channel with userId:", userId);
     
     setTimeout(() => {
       // Check if the user exists in our mock database
+      // If userId doesn't exist in mockUsers, use user1 as fallback
       const foundUser = mockUsers[userId] || mockUsers['user1'];
+      console.log("Found user:", foundUser.id, foundUser.username);
       
       setUser({
         id: foundUser.id,
@@ -218,7 +221,10 @@ function Channel() {
             style: { cursor: 'pointer' },
             onClick: () => {
               setShowFollowingModal(false);
-              window.location.href = `/channel/${followedUser.id}`;
+              // Use React Router's Link equivalent redirect
+              window.location = `/channel/${followedUser.id}`;
+              // Force a reload if needed to make sure the component remounts
+              setTimeout(() => window.location.reload(), 50);
             }
           },
           // User avatar
