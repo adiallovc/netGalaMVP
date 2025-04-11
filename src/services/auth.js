@@ -45,16 +45,15 @@ export async function login(credentials) {
   }
 }
 
-// Get current user
-export async function getCurrentUser(userId) {
+// Get current user from localStorage
+export async function getCurrentUser() {
   try {
-    const response = await axios.get(`${API_URL}/users/${userId}`);
-    return response.data;
+    // Get current user from localStorage
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    return user;
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      return null;
-    }
-    throw new Error('Failed to get user profile');
+    console.error('Error retrieving current user from localStorage:', error);
+    return null;
   }
 }
 
