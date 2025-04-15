@@ -12,7 +12,7 @@
   "description": "",
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^4.4.0",
     "axios": "^1.8.4",
     "bootstrap": "^5.3.5",
     "cors": "^2.8.5",
