@@ -206,6 +206,129 @@ app.get('/api/videos', async (req, res) => {
   }
 });
 
+// Get video by ID
+app.get('/api/videos/:id', async (req, res) => {
+  try {
+    const videoId = req.params.id;
+    
+    // For demo purposes, we'll use the mock data
+    // In production, this would fetch from the database
+    const allVideos = [
+      {
+        id: '1',
+        title: 'Other - AI Generated Music Video',
+        description: 'An AI-generated music video based on audio input',
+        videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+        userId: '1',
+        username: 'Creative_AI',
+        userAvatar: 'https://i.pravatar.cc/300?img=1',
+        views: 1254,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString()
+      },
+      // Other videos here...
+    ];
+    
+    const video = allVideos.find(v => v.id === videoId);
+    
+    if (!video) {
+      return res.status(404).json({ error: 'Video not found' });
+    }
+    
+    res.json(video);
+  } catch (error) {
+    console.error(`Get video ${req.params.id} error:`, error);
+    res.status(500).json({ error: 'Failed to get video' });
+  }
+});
+
+// Upload a new video
+app.post('/api/videos/upload', async (req, res) => {
+  try {
+    // In a production implementation, this endpoint would:
+    // 1. Use multer or similar middleware to handle file uploads
+    // 2. Validate the video file (format, size, etc.)
+    // 3. Store the video file (cloud storage, local filesystem, etc.)
+    // 4. Create a database record for the video
+    // 5. Process the video (generate thumbnails, encode, etc.)
+    
+    // For the demo, we'll respond with a mock success message
+    res.status(201).json({
+      id: Math.floor(Math.random() * 10000),
+      message: 'Video uploaded successfully',
+      status: 'success'
+    });
+  } catch (error) {
+    console.error('Video upload error:', error);
+    res.status(500).json({ error: 'Failed to upload video' });
+  }
+});
+
+// Generate AI video from audio and text prompt
+app.post('/api/videos/generate', async (req, res) => {
+  try {
+    // In a production implementation, this endpoint would:
+    // 1. Accept an audio file and prompt text
+    // 2. Check if required API keys are present and valid
+    // 3. Call the selected AI video generation API (Runway, PikaLabs, etc.)
+    // 4. Process the result and store the generated video
+    
+    // Check for API keys (simulated for now)
+    const hasRunwayKey = process.env.RUNWAY_API_KEY ? true : false;
+    const hasPikaKey = process.env.PIKA_API_KEY ? true : false;
+    
+    if (!hasRunwayKey && !hasPikaKey) {
+      return res.status(400).json({
+        error: 'Missing API keys for video generation',
+        apiKeyStatus: 'missing'
+      });
+    }
+    
+    // For the demo, we'll respond with a mock success message
+    res.status(202).json({
+      id: Math.floor(Math.random() * 10000),
+      message: 'Video generation started',
+      status: 'processing',
+      estimatedTime: '60 seconds'
+    });
+  } catch (error) {
+    console.error('AI video generation error:', error);
+    res.status(500).json({ error: 'Failed to generate AI video' });
+  }
+});
+
+// Get user's videos
+app.get('/api/users/:userId/videos', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    // For demo purposes, we'll use the mock data
+    // In production, this would fetch from the database
+    const allVideos = [
+      {
+        id: '1',
+        title: 'Other - AI Generated Music Video',
+        description: 'An AI-generated music video based on audio input',
+        videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+        userId: '1',
+        username: 'Creative_AI',
+        userAvatar: 'https://i.pravatar.cc/300?img=1',
+        views: 1254,
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString()
+      },
+      // Other videos here...
+    ];
+    
+    const userVideos = allVideos.filter(video => video.userId === userId);
+    
+    res.json(userVideos);
+  } catch (error) {
+    console.error(`Get user ${req.params.userId} videos error:`, error);
+    res.status(500).json({ error: 'Failed to get user videos' });
+  }
+});
+
 // === STATIC FILES ===
 
 // Serve static files from build directory
