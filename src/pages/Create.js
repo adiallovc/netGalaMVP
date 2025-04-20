@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateAIVideo } from '../services/video';
+import { generateAIVideo, checkAPIKeyStatus, setupAPIKeys } from '../services/video';
 
 function Create({ currentUser }) {
   const navigate = useNavigate();
@@ -10,10 +10,84 @@ function Create({ currentUser }) {
   const [model, setModel] = useState('runway'); // Default model
   const [style, setStyle] = useState('cinematic'); // Default style
   const [loading, setLoading] = useState(false);
+  const [checkingApiStatus, setCheckingApiStatus] = useState(true);
   const [apiKeyStatus, setApiKeyStatus] = useState('unknown'); // 'unknown', 'missing', 'available'
+  const [availableProviders, setAvailableProviders] = useState({});
   const [generationProgress, setGenerationProgress] = useState(0);
   const [error, setError] = useState('');
   const [audioFileName, setAudioFileName] = useState('');
+  
+  // API Key configuration
+  const [runwayApiKey, setRunwayApiKey] = useState('');
+  const [pikaApiKey, setPikaApiKey] = useState('');
+  const [settingApiKeys, setSettingApiKeys] = useState(false);
+  
+  // Handle API key submission
+  const handleApiKeySubmit = async () => {
+    try {
+      setSettingApiKeys(true);
+      setError('');
+      
+      // Prepare API key data
+      const apiKeyData = {
+        runwayApiKey: runwayApiKey.trim(),
+        pikaApiKey: pikaApiKey.trim()
+      };
+      
+      // Submit API keys
+      const result = await setupAPIKeys(apiKeyData);
+      
+      // Update API key status
+      if (result.status === 'available') {
+        setApiKeyStatus('available');
+        setAvailableProviders(result.providers || {});
+        
+        // Show success message
+        alert('API keys configured successfully! You can now generate AI videos.');
+        
+        // Clear API key inputs for security
+        setRunwayApiKey('');
+        setPikaApiKey('');
+      } else {
+        setError('Failed to configure API keys. Please check your keys and try again.');
+      }
+    } catch (err) {
+      console.error('API key configuration error:', err);
+      setError(err.message || 'Failed to configure API keys. Please try again.');
+    } finally {
+      setSettingApiKeys(false);
+    }
+  };
+  
+  // Check API key status on component mount
+  useEffect(() => {
+    const checkApiStatus = async () => {
+      try {
+        setCheckingApiStatus(true);
+        const status = await checkAPIKeyStatus();
+        
+        if (status.status === 'available') {
+          setApiKeyStatus('available');
+          setAvailableProviders(status.providers || {});
+          
+          // Set the model to the first available provider
+          const availableProvider = Object.keys(status.providers).find(key => status.providers[key]);
+          if (availableProvider) {
+            setModel(availableProvider);
+          }
+        } else {
+          setApiKeyStatus('missing');
+        }
+      } catch (err) {
+        console.error('Failed to check API status:', err);
+        setApiKeyStatus('unknown');
+      } finally {
+        setCheckingApiStatus(false);
+      }
+    };
+    
+    checkApiStatus();
+  }, []);
 
   // Handle API generation
   const handleSubmit = async (e) => {
@@ -141,6 +215,70 @@ function Create({ currentUser }) {
             React.createElement(
               "div",
               { className: "card-body p-4" },
+              // API Key Status Indicator
+              apiKeyStatus === 'missing' && React.createElement(
+                "div",
+                { className: "mb-4" },
+                React.createElement(
+                  "div",
+                  { className: "alert alert-warning", role: "alert" },
+                  React.createElement("strong", null, "API Keys Required: "),
+                  "This feature requires Runway or Pika Labs API keys. Please enter your API keys below to enable AI video generation."
+                ),
+                React.createElement(
+                  "div", 
+                  { className: "card border-warning mt-3" },
+                  React.createElement(
+                    "div",
+                    { className: "card-body" },
+                    React.createElement("h5", { className: "card-title" }, "Configure API Keys"),
+                    React.createElement("p", { className: "card-text mb-3" }, "Enter your API keys from Runway ML or Pika Labs to enable AI video generation. You can obtain these from their respective developer portals."),
+                    React.createElement(
+                      "div",
+                      { className: "mb-3" },
+                      React.createElement("label", { htmlFor: "runway-api-key", className: "form-label" }, "Runway ML API Key"),
+                      React.createElement("input", { 
+                        type: "password", 
+                        className: "form-control", 
+                        id: "runway-api-key", 
+                        placeholder: "Enter your Runway API key", 
+                        value: runwayApiKey || '',
+                        onChange: (e) => setRunwayApiKey(e.target.value)
+                      })
+                    ),
+                    React.createElement(
+                      "div",
+                      { className: "mb-3" },
+                      React.createElement("label", { htmlFor: "pika-api-key", className: "form-label" }, "Pika Labs API Key"),
+                      React.createElement("input", { 
+                        type: "password", 
+                        className: "form-control", 
+                        id: "pika-api-key", 
+                        placeholder: "Enter your Pika Labs API key", 
+                        value: pikaApiKey || '',
+                        onChange: (e) => setPikaApiKey(e.target.value)
+                      })
+                    ),
+                    React.createElement(
+                      "div",
+                      { className: "d-grid" },
+                      React.createElement("button", { 
+                        className: "btn btn-warning", 
+                        onClick: handleApiKeySubmit,
+                        disabled: settingApiKeys || (!runwayApiKey && !pikaApiKey)
+                      }, settingApiKeys ? "Saving..." : "Save API Keys")
+                    )
+                  )
+                )
+              ),
+              
+              // Loading API Status Indicator
+              checkingApiStatus && React.createElement(
+                "div",
+                { className: "alert alert-info mb-4", role: "alert" },
+                "Checking API availability..."
+              ),
+              
               // Error message
               error && React.createElement(
                 "div",
@@ -338,10 +476,10 @@ function Create({ currentUser }) {
                     {
                       type: "submit",
                       className: "btn btn-primary py-2",
-                      disabled: loading,
+                      disabled: loading || apiKeyStatus === 'missing' || checkingApiStatus,
                       style: { backgroundColor: '#6f42c1', borderColor: '#6f42c1' }
                     },
-                    loading ? "Generating..." : "Generate Video"
+                    loading ? "Generating..." : checkingApiStatus ? "Checking API Status..." : apiKeyStatus === 'missing' ? "API Keys Required" : "Generate Video"
                   )
                 )
               )

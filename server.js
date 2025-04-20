@@ -329,6 +329,58 @@ app.get('/api/users/:userId/videos', async (req, res) => {
   }
 });
 
+// Check API status for video generation
+app.get('/api/api-status', async (req, res) => {
+  try {
+    // Import the API key utilities
+    const { getApiKeyStatus } = require('./config/api-keys');
+    
+    // Get the API key status
+    const apiKeyStatus = getApiKeyStatus();
+    
+    // Return the status
+    res.json({
+      status: apiKeyStatus.status,
+      providers: apiKeyStatus.providers
+    });
+  } catch (error) {
+    console.error('API status check error:', error);
+    res.status(500).json({ error: 'Failed to check API status' });
+  }
+});
+
+// Set API keys
+app.post('/api/setup-api-keys', async (req, res) => {
+  try {
+    const { runwayApiKey, pikaApiKey } = req.body;
+    
+    // Update the environment variables
+    if (runwayApiKey) {
+      process.env.RUNWAY_API_KEY = runwayApiKey;
+    }
+    
+    if (pikaApiKey) {
+      process.env.PIKA_API_KEY = pikaApiKey;
+    }
+    
+    // Import the API key utilities
+    const { getApiKeyStatus } = require('./config/api-keys');
+    
+    // Get the updated status
+    const apiKeyStatus = getApiKeyStatus();
+    
+    // Return the status
+    res.json({
+      message: 'API keys updated successfully',
+      status: apiKeyStatus.status,
+      providers: apiKeyStatus.providers
+    });
+  } catch (error) {
+    console.error('API key setup error:', error);
+    res.status(500).json({ error: 'Failed to setup API keys' });
+  }
+});
+
 // === STATIC FILES ===
 
 // Serve static files from build directory

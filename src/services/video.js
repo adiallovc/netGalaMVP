@@ -1,112 +1,161 @@
 import axios from 'axios';
 
-// Base API URL
-const API_URL = '/api';
-
-// Get videos with time filter
-export async function getVideos(timeFilter = 'last24hours') {
+// Get all videos (with optional time filter)
+export const getVideos = async (timeFilter = 'all') => {
   try {
-    const response = await axios.get(`${API_URL}/videos`, {
-      params: { timeFilter }
-    });
+    const response = await axios.get(`/api/videos?timeFilter=${timeFilter}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching videos:', error);
-    throw new Error('Failed to load videos');
+    throw error;
   }
-}
+};
 
-// Upload a new video
-export async function uploadVideo(videoData, videoFile, onProgress) {
+// Get a specific video by ID
+export const getVideoById = async (videoId) => {
   try {
-    // Create FormData to handle file uploads
-    const formData = new FormData();
-    
-    // Add video file
-    formData.append('videoFile', videoFile);
-    
-    // Add other video metadata as JSON
-    Object.keys(videoData).forEach(key => {
-      formData.append(key, videoData[key]);
-    });
-    
-    // Send the upload request
-    const response = await axios.post(`${API_URL}/videos/upload`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress: (progressEvent) => {
-        if (onProgress) {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          onProgress(percentCompleted);
-        }
-      }
-    });
-    
+    const response = await axios.get(`/api/videos/${videoId}`);
     return response.data;
   } catch (error) {
-    console.error('Error uploading video:', error);
-    throw new Error(error.response?.data?.error || 'Failed to upload video');
+    console.error(`Error fetching video ${videoId}:`, error);
+    throw error;
   }
-}
-
-// Get video by ID
-export async function getVideoById(id) {
-  try {
-    const response = await axios.get(`${API_URL}/videos/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching video with ID ${id}:`, error);
-    throw new Error('Failed to load video');
-  }
-}
+};
 
 // Get videos by user ID
-export async function getVideosByUserId(userId) {
+export const getVideosByUserId = async (userId) => {
   try {
-    const response = await axios.get(`${API_URL}/users/${userId}/videos`);
+    const response = await axios.get(`/api/users/${userId}/videos`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching videos for user ${userId}:`, error);
-    throw new Error('Failed to load user videos');
+    throw error;
   }
-}
+};
 
-// Generate AI video from audio and text prompt
-export async function generateAIVideo(audioFile, promptData, onProgress) {
+// Upload a video file
+export const uploadVideo = async (videoFile, metadata, onProgress) => {
   try {
-    // Create FormData to handle file uploads
+    // Create form data
     const formData = new FormData();
+    formData.append('video', videoFile);
+    formData.append('title', metadata.title);
     
-    // Add audio file
-    formData.append('audioFile', audioFile);
+    if (metadata.description) {
+      formData.append('description', metadata.description);
+    }
     
-    // Add other data as JSON
-    Object.keys(promptData).forEach(key => {
-      formData.append(key, promptData[key]);
-    });
+    // Add any additional metadata
+    if (metadata.tags) {
+      formData.append('tags', JSON.stringify(metadata.tags));
+    }
     
-    // Call the API endpoint to start video generation
-    const response = await axios.post(`${API_URL}/videos/generate`, formData, {
+    // Configuration for progress tracking
+    const config = {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
       onUploadProgress: (progressEvent) => {
-        if (onProgress) {
-          // This only tracks upload progress, not generation
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        if (onProgress && typeof onProgress === 'function') {
           onProgress(percentCompleted);
         }
       }
-    });
+    };
+    
+    // Make the API request
+    const response = await axios.post('/api/videos/upload', formData, config);
+    return response.data;
+    
+  } catch (error) {
+    console.error('Error uploading video:', error);
+    throw error;
+  }
+};
+
+// Generate AI video from audio and text prompt
+export const generateAIVideo = async (audioFile, promptData, onProgress) => {
+  try {
+    // Create form data
+    const formData = new FormData();
+    formData.append('audio', audioFile);
+    formData.append('title', promptData.title);
+    formData.append('prompt', promptData.prompt);
+    formData.append('model', promptData.model || 'runway');
+    
+    if (promptData.style) {
+      formData.append('style', promptData.style);
+    }
+    
+    // Add any additional metadata
+    if (promptData.userId) {
+      formData.append('userId', promptData.userId);
+    }
+    
+    if (promptData.username) {
+      formData.append('username', promptData.username);
+    }
+    
+    // Configuration for progress tracking
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (progressEvent) => {
+        // For the upload phase, we'll track progress from 0-50%
+        const percentCompleted = Math.round((progressEvent.loaded * 50) / progressEvent.total);
+        if (onProgress && typeof onProgress === 'function') {
+          onProgress(percentCompleted);
+        }
+      }
+    };
+    
+    // Make the API request to start generation
+    const response = await axios.post('/api/videos/generate', formData, config);
+    
+    // For the processing phase, we could poll for status or use WebSockets for real-time updates
+    // For now, we'll simulate progress from 50-100%
+    if (onProgress && typeof onProgress === 'function') {
+      // Start at 50% (upload complete)
+      let progress = 50;
+      
+      // Simulate progress updates during processing
+      const interval = setInterval(() => {
+        progress += 5;
+        onProgress(progress);
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
     
     return response.data;
+    
   } catch (error) {
     console.error('Error generating AI video:', error);
-    throw new Error(error.response?.data?.error || 'Failed to generate video');
+    throw error;
   }
-}
+};
+
+// Check if API keys are available for AI video generation
+export const checkAPIKeyStatus = async () => {
+  try {
+    const response = await axios.get('/api/api-status');
+    return response.data;
+  } catch (error) {
+    console.error('Error checking API status:', error);
+    return { status: 'error', message: error.message };
+  }
+};
+
+// Set up API keys for video generation
+export const setupAPIKeys = async (keys) => {
+  try {
+    const response = await axios.post('/api/setup-api-keys', keys);
+    return response.data;
+  } catch (error) {
+    console.error('Error setting up API keys:', error);
+    throw error;
+  }
+};
