@@ -1,4 +1,21 @@
-// API Key configuration for video generation services
+/**
+ * API Key configuration for video generation services
+ * 
+ * SETUP INSTRUCTIONS:
+ * 
+ * 1. Obtain API keys from:
+ *    - Runway: https://runwayml.com/api
+ *    - Pika Labs: https://pika.art/api
+ * 
+ * 2. Set the API keys as environment variables in a .env file:
+ *    RUNWAY_API_KEY=your_runway_api_key
+ *    PIKA_API_KEY=your_pika_api_key
+ * 
+ * 3. For production deployments, set these as secure environment variables
+ *    in your hosting provider's dashboard.
+ * 
+ * NOTE: These keys should be kept confidential and should NEVER be exposed to end users.
+ */
 
 // Check if an API key exists in environment variables
 const hasApiKey = (keyName) => {

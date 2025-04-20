@@ -349,9 +349,14 @@ app.get('/api/api-status', async (req, res) => {
   }
 });
 
-// Set API keys
-app.post('/api/setup-api-keys', async (req, res) => {
+// This endpoint would be protected in a real production environment
+// It's for admin use only, not for regular users
+app.post('/api/admin/setup-api-keys', async (req, res) => {
   try {
+    // In a real application, this endpoint would:
+    // 1. Validate admin credentials or require admin authentication middleware
+    // 2. Store API keys in a secure environment or database, not just in-memory
+    
     const { runwayApiKey, pikaApiKey } = req.body;
     
     // Update the environment variables
