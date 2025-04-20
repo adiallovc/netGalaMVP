@@ -19,6 +19,7 @@
     "drizzle-kit": "^0.30.6",
     "drizzle-orm": "^0.41.0",
     "express": "^5.1.0",
+    "multer": "^1.4.5-lts.2",
     "pg": "^8.14.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
