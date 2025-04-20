@@ -26,20 +26,38 @@ async function generateVideoFromAudio(audioFilePath, prompt, options = {}) {
       throw new Error('Valid prompt text is required');
     }
     
-    // In a real implementation, we would:
-    // 1. Read the audio file and prepare it for the API
-    // 2. Make the API request to Pika Labs
-    // 3. Process the response and return the generated video URL
+    // Read the audio file
+    const audioData = fs.readFileSync(audioFilePath);
+    const audioBuffer = Buffer.from(audioData);
     
-    console.log(`[PIKA] Would generate video with prompt: "${prompt}"`);
-    console.log(`[PIKA] Using audio file: ${audioFilePath}`);
-    console.log(`[PIKA] With options:`, options);
+    // Calculate audio duration (assuming mp3 format)
+    const audioDuration = await getAudioDuration(audioBuffer);
     
-    // For demo, return a mock success response
+    // Prepare the request payload
+    const payload = {
+      audio: audioBuffer.toString('base64'),
+      prompt,
+      options: {
+        ...options,
+        audioSync: true,
+        loopVideo: true,
+        targetDuration: audioDuration
+      }
+    };
+    
+    // Make the API request
+    const response = await axios.post(`${PIKA_API_URL}/generate`, payload, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
     return {
-      status: 'success',
-      videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-      thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg'
+      status: response.data.status,
+      videoUrl: response.data.videoUrl,
+      thumbnailUrl: response.data.thumbnailUrl,
+      duration: audioDuration
     };
     
     /* This would be the actual implementation:
