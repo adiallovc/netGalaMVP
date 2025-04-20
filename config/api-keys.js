@@ -5,11 +5,11 @@
  * 
  * 1. Obtain API keys from:
  *    - Runway: https://runwayml.com/api
- *    - Pika Labs: https://pika.art/api
+ *    - FastPix: [Obtain FastPix API key instructions here]
  * 
  * 2. Set the API keys as environment variables in a .env file:
  *    RUNWAY_API_KEY=your_runway_api_key
- *    PIKA_API_KEY=your_pika_api_key
+ *    FASTPIX_API_KEY=your_fastpix_api_key
  * 
  * 3. For production deployments, set these as secure environment variables
  *    in your hosting provider's dashboard.
@@ -25,14 +25,14 @@ const hasApiKey = (keyName) => {
 // Get API key status
 const getApiKeyStatus = () => {
   const hasRunwayKey = hasApiKey('RUNWAY_API_KEY');
-  const hasPikaKey = hasApiKey('PIKA_API_KEY');
-  
-  if (hasRunwayKey || hasPikaKey) {
+  const hasFastPixKey = hasApiKey('FASTPIX_API_KEY');
+
+  if (hasRunwayKey || hasFastPixKey) {
     return {
       status: 'available',
       providers: {
         runway: hasRunwayKey,
-        pika: hasPikaKey
+        fastpix: hasFastPixKey
       }
     };
   } else {
@@ -40,7 +40,7 @@ const getApiKeyStatus = () => {
       status: 'missing',
       providers: {
         runway: false,
-        pika: false
+        fastpix: false
       }
     };
   }
@@ -51,8 +51,8 @@ const getApiKey = (provider) => {
   switch (provider.toLowerCase()) {
     case 'runway':
       return process.env.RUNWAY_API_KEY;
-    case 'pika':
-      return process.env.PIKA_API_KEY;
+    case 'fastpix':
+      return process.env.FASTPIX_API_KEY;
     default:
       return null;
   }

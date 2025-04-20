@@ -52,7 +52,7 @@ async function generateVideo(audioFilePath, options) {
       case 'runway':
         result = await runway.generateVideoFromAudio(audioFilePath, prompt, options);
         break;
-      case 'pika':
+      case 'fastpix':
         result = await pika.generateVideoFromAudio(audioFilePath, prompt, options);
         break;
       default:
