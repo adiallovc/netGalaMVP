@@ -1,20 +1,116 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { uploadVideo } from '../services/videoService';
+import { uploadVideo } from '../services/video';
 
-function Upload() {
+function Upload({ currentUser }) {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoFileName, setVideoFileName] = useState('');
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailFileName, setThumbnailFileName] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  // Handle video file selection
+  const handleVideoSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file type
+      if (!file.type.includes('video/')) {
+        setError('Please upload a video file (MP4, MOV, etc.)');
+        return;
+      }
+      
+      // Check file size (limit to 500MB)
+      if (file.size > 500 * 1024 * 1024) {
+        setError('Video file must be less than 500MB');
+        return;
+      }
+      
+      setVideoFile(file);
+      setVideoFileName(file.name);
+      setError('');
+    }
+  };
+  
+  // Handle thumbnail image selection
+  const handleThumbnailSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file type
+      if (!file.type.includes('image/')) {
+        setError('Please upload an image file for the thumbnail (JPG, PNG, etc.)');
+        return;
+      }
+      
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Thumbnail image must be less than 5MB');
+        return;
+      }
+      
+      setThumbnailFile(file);
+      setThumbnailFileName(file.name);
+      setError('');
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Upload functionality is coming in the next development phase. The MVP is focused on AI-generated videos. Please use the Create page to generate videos from your audio.');
-    // Redirect to home for now
-    navigate('/');
+    
+    // Validate form inputs
+    if (!title) {
+      setError('Please enter a title for your video');
+      return;
+    }
+    
+    if (!videoFile) {
+      setError('Please select a video file to upload');
+      return;
+    }
+    
+    if (!category) {
+      setError('Please select a category for your video');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Prepare video data
+      const videoData = {
+        title,
+        description,
+        category,
+        userId: currentUser?.id,
+        username: currentUser?.username
+      };
+      
+      // Upload the video
+      const result = await uploadVideo(
+        videoData, 
+        videoFile, 
+        (progress) => setUploadProgress(progress)
+      );
+      
+      // Show success message
+      alert('Video uploaded successfully!');
+      
+      // Navigate to the video page or home
+      navigate(`/`);
+      
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError(err.message || 'Failed to upload video. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Simple upload form with basic fields using React.createElement
@@ -98,6 +194,102 @@ function Upload() {
                     }
                   )
                 ),
+                // Video file upload
+                React.createElement(
+                  "div",
+                  { className: "mb-4" },
+                  React.createElement(
+                    "label",
+                    { htmlFor: "video-file", className: "form-label fw-bold" },
+                    "Video File"
+                  ),
+                  React.createElement(
+                    "div",
+                    { className: "d-flex align-items-center" },
+                    React.createElement(
+                      "div",
+                      { className: "d-grid flex-grow-1 me-2" },
+                      React.createElement(
+                        "label",
+                        { 
+                          htmlFor: "video-upload",
+                          className: "btn btn-outline-primary",
+                          style: { borderColor: '#6f42c1', color: '#6f42c1' }
+                        },
+                        "Select Video"
+                      ),
+                      React.createElement(
+                        "input",
+                        {
+                          type: "file",
+                          id: "video-upload",
+                          accept: "video/*",
+                          onChange: handleVideoSelect,
+                          className: "d-none"
+                        }
+                      )
+                    ),
+                    videoFileName && React.createElement(
+                      "div",
+                      { className: "ms-2 text-truncate", style: { maxWidth: "300px" } },
+                      videoFileName
+                    )
+                  ),
+                  React.createElement(
+                    "small",
+                    { className: "text-muted d-block mt-1" },
+                    "Supported formats: MP4, MOV, AVI. Maximum size: 500MB"
+                  )
+                ),
+                
+                // Thumbnail upload (optional)
+                React.createElement(
+                  "div",
+                  { className: "mb-4" },
+                  React.createElement(
+                    "label",
+                    { htmlFor: "thumbnail", className: "form-label fw-bold" },
+                    "Thumbnail Image (Optional)"
+                  ),
+                  React.createElement(
+                    "div",
+                    { className: "d-flex align-items-center" },
+                    React.createElement(
+                      "div",
+                      { className: "d-grid flex-grow-1 me-2" },
+                      React.createElement(
+                        "label",
+                        { 
+                          htmlFor: "thumbnail-upload",
+                          className: "btn btn-outline-primary",
+                          style: { borderColor: '#6f42c1', color: '#6f42c1' }
+                        },
+                        "Select Thumbnail"
+                      ),
+                      React.createElement(
+                        "input",
+                        {
+                          type: "file",
+                          id: "thumbnail-upload",
+                          accept: "image/*",
+                          onChange: handleThumbnailSelect,
+                          className: "d-none"
+                        }
+                      )
+                    ),
+                    thumbnailFileName && React.createElement(
+                      "div",
+                      { className: "ms-2 text-truncate", style: { maxWidth: "300px" } },
+                      thumbnailFileName
+                    )
+                  ),
+                  React.createElement(
+                    "small",
+                    { className: "text-muted d-block mt-1" },
+                    "Supported formats: JPG, PNG. Maximum size: 5MB"
+                  )
+                ),
+                
                 // Category field
                 React.createElement(
                   "div",
@@ -121,6 +313,36 @@ function Upload() {
                     React.createElement("option", { value: "gaming" }, "Gaming"),
                     React.createElement("option", { value: "education" }, "Education"),
                     React.createElement("option", { value: "entertainment" }, "Entertainment")
+                  )
+                ),
+                
+                // Upload progress
+                uploadProgress > 0 && React.createElement(
+                  "div", 
+                  { className: "mb-4" },
+                  React.createElement(
+                    "label",
+                    { className: "form-label fw-bold" },
+                    "Upload Progress"
+                  ),
+                  React.createElement(
+                    "div",
+                    { className: "progress" },
+                    React.createElement(
+                      "div",
+                      { 
+                        className: "progress-bar",
+                        role: "progressbar",
+                        style: { 
+                          width: `${uploadProgress}%`,
+                          backgroundColor: '#6f42c1'
+                        },
+                        "aria-valuenow": uploadProgress,
+                        "aria-valuemin": "0",
+                        "aria-valuemax": "100"
+                      },
+                      `${uploadProgress}%`
+                    )
                   )
                 ),
                 // Submit button

@@ -1,33 +1,96 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { generateVideo, uploadGeneratedVideo } from '../services/videoService';
+import { generateAIVideo } from '../services/video';
 
-function Create() {
+function Create({ currentUser }) {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState('');
   const [title, setTitle] = useState('');
   const [audioFile, setAudioFile] = useState(null);
+  const [model, setModel] = useState('runway'); // Default model
+  const [style, setStyle] = useState('cinematic'); // Default style
   const [loading, setLoading] = useState(false);
+  const [apiKeyStatus, setApiKeyStatus] = useState('unknown'); // 'unknown', 'missing', 'available'
+  const [generationProgress, setGenerationProgress] = useState(0);
   const [error, setError] = useState('');
   const [audioFileName, setAudioFileName] = useState('');
 
-  const handleSubmit = (e) => {
+  // Handle API generation
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate inputs
     if (!audioFile) {
       setError('Please upload an audio file first');
       return;
     }
     
-    // For the MVP phase, we'll show an informative message about the API integration
-    setLoading(true);
+    if (!title) {
+      setError('Please provide a title for your video');
+      return;
+    }
     
-    setTimeout(() => {
-      setLoading(false);
-      alert('This feature requires integration with an AI video generation API such as Runway or Pika Labs. In the final implementation, your audio will be combined with AI-generated visuals based on your description.');
+    if (!prompt || prompt.length < 10) {
+      setError('Please provide a detailed description for better results (minimum 10 characters)');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError('');
       
-      // For demo purposes, we'll simulate success and redirect
-      navigate('/');
-    }, 1500);
+      // Prepare data for video generation
+      const promptData = {
+        title,
+        prompt,
+        model,
+        style,
+        userId: currentUser?.id,
+        username: currentUser?.username
+      };
+      
+      // For the demo, we'll check if we have API keys before proceeding
+      // In production, this check would happen on the server
+      // This is to prevent unnecessary file uploads if keys are missing
+      
+      // Since we're in the early implementation phase, we'll show an informative message
+      // about the API integration instead of making the actual API call
+      
+      if (apiKeyStatus === 'missing') {
+        setError('API keys for video generation are missing. Please contact support to enable this feature.');
+        setLoading(false);
+        return;
+      }
+      
+      // Send the generation request
+      // In a real implementation, this would call the actual API
+      setTimeout(() => {
+        setLoading(false);
+        alert('This feature requires integration with an AI video generation API such as Runway or Pika Labs. In the final implementation, your audio will be combined with AI-generated visuals based on your description.');
+        
+        // For demo purposes, we'll simulate success and redirect
+        navigate('/');
+      }, 1500);
+      
+      /* This is the code that would be used in the final implementation:
+      const result = await generateAIVideo(
+        audioFile, 
+        promptData, 
+        (progress) => setGenerationProgress(progress)
+      );
+      
+      // Handle successful generation
+      alert('Video generated successfully!');
+      
+      // Navigate to the video page or home
+      navigate(`/`);
+      */
+      
+    } catch (err) {
+      console.error('Generation error:', err);
+      setError(err.message || 'Failed to generate video. Please try again.');
+      setLoading(false);
+    }
   };
   
   const handleAudioUpload = (e) => {
@@ -181,6 +244,89 @@ function Create() {
                     "small",
                     { className: "text-muted" },
                     "Be descriptive for better results. The AI will generate visuals based on your description."
+                  )
+                ),
+                
+                // Model selection
+                React.createElement(
+                  "div",
+                  { className: "mb-4" },
+                  React.createElement(
+                    "label",
+                    { htmlFor: "model", className: "form-label fw-bold" },
+                    "AI Model"
+                  ),
+                  React.createElement(
+                    "select",
+                    {
+                      className: "form-select",
+                      id: "model",
+                      value: model,
+                      onChange: (e) => setModel(e.target.value)
+                    },
+                    React.createElement("option", { value: "runway" }, "Runway Gen-2"),
+                    React.createElement("option", { value: "pika" }, "Pika Labs"),
+                    React.createElement("option", { value: "stable" }, "Stable Video Diffusion")
+                  ),
+                  React.createElement(
+                    "small",
+                    { className: "text-muted" },
+                    "Different models produce different visual styles and results."
+                  )
+                ),
+                
+                // Style selection
+                React.createElement(
+                  "div",
+                  { className: "mb-4" },
+                  React.createElement(
+                    "label",
+                    { htmlFor: "style", className: "form-label fw-bold" },
+                    "Visual Style"
+                  ),
+                  React.createElement(
+                    "select",
+                    {
+                      className: "form-select",
+                      id: "style",
+                      value: style,
+                      onChange: (e) => setStyle(e.target.value)
+                    },
+                    React.createElement("option", { value: "cinematic" }, "Cinematic"),
+                    React.createElement("option", { value: "animation" }, "Animation"),
+                    React.createElement("option", { value: "3d" }, "3D Render"),
+                    React.createElement("option", { value: "vintage" }, "Vintage Film"),
+                    React.createElement("option", { value: "abstract" }, "Abstract Visualization")
+                  )
+                ),
+                
+                // Progress indicator (if generation is in progress)
+                generationProgress > 0 && React.createElement(
+                  "div", 
+                  { className: "mb-4" },
+                  React.createElement(
+                    "label",
+                    { className: "form-label fw-bold" },
+                    "Generation Progress"
+                  ),
+                  React.createElement(
+                    "div",
+                    { className: "progress" },
+                    React.createElement(
+                      "div",
+                      { 
+                        className: "progress-bar",
+                        role: "progressbar",
+                        style: { 
+                          width: `${generationProgress}%`,
+                          backgroundColor: '#6f42c1'
+                        },
+                        "aria-valuenow": generationProgress,
+                        "aria-valuemin": "0",
+                        "aria-valuemax": "100"
+                      },
+                      `${generationProgress}%`
+                    )
                   )
                 ),
                 // Submit button

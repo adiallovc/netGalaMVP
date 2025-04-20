@@ -17,11 +17,24 @@ export async function getVideos(timeFilter = 'last24hours') {
 }
 
 // Upload a new video
-export async function uploadVideo(videoData, onProgress) {
+export async function uploadVideo(videoData, videoFile, onProgress) {
   try {
-    // In a real app, this would handle file uploads with FormData
-    // For now, just simulate an API call
-    const response = await axios.post(`${API_URL}/videos`, videoData, {
+    // Create FormData to handle file uploads
+    const formData = new FormData();
+    
+    // Add video file
+    formData.append('videoFile', videoFile);
+    
+    // Add other video metadata as JSON
+    Object.keys(videoData).forEach(key => {
+      formData.append(key, videoData[key]);
+    });
+    
+    // Send the upload request
+    const response = await axios.post(`${API_URL}/videos/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
       onUploadProgress: (progressEvent) => {
         if (onProgress) {
           const percentCompleted = Math.round(
@@ -31,10 +44,11 @@ export async function uploadVideo(videoData, onProgress) {
         }
       }
     });
+    
     return response.data;
   } catch (error) {
     console.error('Error uploading video:', error);
-    throw new Error('Failed to upload video');
+    throw new Error(error.response?.data?.error || 'Failed to upload video');
   }
 }
 
@@ -57,5 +71,42 @@ export async function getVideosByUserId(userId) {
   } catch (error) {
     console.error(`Error fetching videos for user ${userId}:`, error);
     throw new Error('Failed to load user videos');
+  }
+}
+
+// Generate AI video from audio and text prompt
+export async function generateAIVideo(audioFile, promptData, onProgress) {
+  try {
+    // Create FormData to handle file uploads
+    const formData = new FormData();
+    
+    // Add audio file
+    formData.append('audioFile', audioFile);
+    
+    // Add other data as JSON
+    Object.keys(promptData).forEach(key => {
+      formData.append(key, promptData[key]);
+    });
+    
+    // Call the API endpoint to start video generation
+    const response = await axios.post(`${API_URL}/videos/generate`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress) {
+          // This only tracks upload progress, not generation
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          onProgress(percentCompleted);
+        }
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error generating AI video:', error);
+    throw new Error(error.response?.data?.error || 'Failed to generate video');
   }
 }
