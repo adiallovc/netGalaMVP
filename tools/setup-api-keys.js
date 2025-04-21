@@ -47,14 +47,14 @@ console.log('\nImportant: Keep your API keys confidential and never share them w
 // Get Runway API Key
 const runwayKey = getExistingValue('RUNWAY_API_KEY');
 rl.question(`Runway API Key ${runwayKey ? `(current: ${runwayKey.slice(0, 4)}...)` : ''}: `, (runwayApiKey) => {
-  // Get Pika API Key
-  const pikaKey = getExistingValue('PIKA_API_KEY');
-  rl.question(`Pika Labs API Key ${pikaKey ? `(current: ${pikaKey.slice(0, 4)}...)` : ''}: `, (pikaApiKey) => {
+  // Get FastPix API Key
+  const fastpixKey = getExistingValue('FASTPIX_API_KEY');
+  rl.question(`FastPix API Key ${fastpixKey ? `(current: ${fastpixKey.slice(0, 4)}...)` : ''}: `, (fastpixApiKey) => {
     rl.close();
     
     // Use existing values if none provided
     const finalRunwayKey = runwayApiKey || runwayKey;
-    const finalPikaKey = pikaApiKey || pikaKey;
+    const finalFastpixKey = fastpixApiKey || fastpixKey;
     
     // Build the .env content
     let envContent = '';
@@ -63,7 +63,8 @@ rl.question(`Runway API Key ${runwayKey ? `(current: ${runwayKey.slice(0, 4)}...
     if (existingEnv) {
       envContent = existingEnv
         .replace(/^RUNWAY_API_KEY=.*$/m, '')
-        .replace(/^PIKA_API_KEY=.*$/m, '')
+        .replace(/^FASTPIX_API_KEY=.*$/m, '')
+        .replace(/^PIKA_API_KEY=.*$/m, '') // Also remove legacy Pika keys if they exist
         .replace(/\n\n+/g, '\n'); // Remove extra newlines
     }
     
@@ -74,8 +75,8 @@ rl.question(`Runway API Key ${runwayKey ? `(current: ${runwayKey.slice(0, 4)}...
       envContent += `RUNWAY_API_KEY=${finalRunwayKey}\n`;
     }
     
-    if (finalPikaKey) {
-      envContent += `PIKA_API_KEY=${finalPikaKey}\n`;
+    if (finalFastpixKey) {
+      envContent += `FASTPIX_API_KEY=${finalFastpixKey}\n`;
     }
     
     // Clean up content
