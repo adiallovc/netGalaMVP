@@ -9,8 +9,8 @@ The netGala platform uses the following external APIs for AI video generation:
 1. **Runway ML API** - For generating videos from audio and text prompts
    - Sign up and get API keys at: https://runwayml.com/api
 
-2. **Pika Labs API** - Alternative video generation service
-   - Sign up and get API keys at: https://pika.art/api
+2. **FastPix API** - Alternative video generation service for audio-to-video conversion
+   - Use your FastPix API key for enhanced video generation capabilities
 
 ## Setup Methods
 
@@ -34,7 +34,7 @@ We provide a command-line tool to easily set up your API keys:
 2. Add your API keys:
    ```
    RUNWAY_API_KEY=your_runway_api_key_here
-   PIKA_API_KEY=your_pika_api_key_here
+   FASTPIX_API_KEY=your_fastpix_api_key_here
    ```
 3. Restart the server to apply the changes
 

@@ -4,6 +4,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const { getApiKey } = require('../../config/api-keys');
+const FormData = require('form-data');
 
 // FastPix API Base URL
 const FASTPIX_API_URL = 'https://api.fastpix.io/v1';
@@ -17,6 +18,7 @@ async function generateVideoFromAudio(audioFilePath, prompt, options = {}) {
       throw new Error('FastPix API key is required');
     }
 
+    // For demo purposes, we'll validate parameters but not make the actual API call
     if (!fs.existsSync(audioFilePath)) {
       throw new Error('Audio file not found');
     }
@@ -24,17 +26,26 @@ async function generateVideoFromAudio(audioFilePath, prompt, options = {}) {
     if (!prompt || typeof prompt !== 'string') {
       throw new Error('Valid prompt text is required');
     }
-
+    
+    console.log(`[FASTPIX] Would generate video with prompt: "${prompt}"`);
+    console.log(`[FASTPIX] Using audio file: ${audioFilePath}`);
+    console.log(`[FASTPIX] With options:`, options);
+    
+    // For demo, return a mock success response
+    return {
+      status: 'success',
+      videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      thumbnailUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg'
+    };
+    
+    /* This would be the actual implementation:
+    
     // Read the audio file
-    const audioData = fs.readFileSync(audioFilePath);
-    const audioBuffer = Buffer.from(audioData);
-
+    const audioFileStream = fs.createReadStream(audioFilePath);
+    
     // Create form data for FastPix API
     const formData = new FormData();
-    formData.append('audio', audioBuffer, {
-      filename: path.basename(audioFilePath),
-      contentType: 'audio/mpeg'
-    });
+    formData.append('audio', audioFileStream, path.basename(audioFilePath));
     formData.append('prompt', prompt);
     formData.append('loop_video', 'true');
 
@@ -46,7 +57,7 @@ async function generateVideoFromAudio(audioFilePath, prompt, options = {}) {
     const response = await axios.post(`${FASTPIX_API_URL}/generate`, formData, {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'multipart/form-data'
+        ...formData.getHeaders()
       }
     });
 
@@ -56,6 +67,7 @@ async function generateVideoFromAudio(audioFilePath, prompt, options = {}) {
       thumbnailUrl: response.data.thumbnail_url,
       duration: response.data.duration
     };
+    */
 
   } catch (error) {
     console.error('FastPix API error:', error);

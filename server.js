@@ -411,31 +411,90 @@ app.get('/api/videos/file/:id', (req, res) => {
 });
 
 // Generate AI video from audio and text prompt
-app.post('/api/videos/generate', async (req, res) => {
+app.post('/api/videos/generate', upload.single('audio'), async (req, res) => {
   try {
-    // In a production implementation, this endpoint would:
-    // 1. Accept an audio file and prompt text
-    // 2. Check if required API keys are present and valid
-    // 3. Call the selected AI video generation API (Runway, PikaLabs, etc.)
-    // 4. Process the result and store the generated video
+    // Import the API generation services
+    const { generateVideo } = require('./services/ai-video');
+    const { getApiKeyStatus, getApiKey } = require('./config/api-keys');
     
-    // Check for API keys (simulated for now)
-    const hasRunwayKey = process.env.RUNWAY_API_KEY ? true : false;
-    const hasPikaKey = process.env.PIKA_API_KEY ? true : false;
+    // Check if we have the required data
+    if (!req.body.prompt) {
+      return res.status(400).json({ error: 'Prompt text is required' });
+    }
     
-    if (!hasRunwayKey && !hasPikaKey) {
+    // Get the API key status
+    const apiKeyStatus = getApiKeyStatus();
+    
+    if (apiKeyStatus.status !== 'available') {
       return res.status(400).json({
         error: 'Missing API keys for video generation',
         apiKeyStatus: 'missing'
       });
     }
     
-    // For the demo, we'll respond with a mock success message
+    // Get the audio file (if any) and prompt text
+    const audioFile = req.file;
+    const { prompt, userId, username, provider } = req.body;
+    
+    // Determine which provider to use
+    const selectedProvider = provider || 
+      (apiKeyStatus.providers.runway ? 'runway' : 
+      (apiKeyStatus.providers.fastpix ? 'fastpix' : null));
+    
+    if (!selectedProvider) {
+      return res.status(400).json({
+        error: 'No valid API provider available',
+        apiKeyStatus: apiKeyStatus
+      });
+    }
+    
+    // Generate a unique ID for this video generation request
+    const generationId = Date.now().toString();
+    
+    // Call the appropriate video generation service
+    // In a real implementation, this would be an async job that updates status
+    
+    // For now, we'll create a placeholder video record
+    const videoId = generationId;
+    const userIdToUse = userId || '1';
+    const usernameToUse = username || 'User_' + userIdToUse;
+    
+    // Create a new video record
+    const newVideo = {
+      id: videoId,
+      title: prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''),
+      description: 'AI-generated video: ' + prompt,
+      videoUrl: `/api/videos/file/${videoId}`,
+      thumbnailUrl: 'https://i.pravatar.cc/300?img=' + (Math.floor(Math.random() * 10) + 1),
+      userId: userIdToUse,
+      username: usernameToUse,
+      userAvatar: 'https://i.pravatar.cc/300?img=' + userIdToUse,
+      views: 0,
+      timestamp: new Date().toISOString(),
+      isAiGenerated: true,
+      generationPrompt: prompt,
+      provider: selectedProvider
+    };
+    
+    // Store the video in our in-memory storage
+    global.uploadedVideos = global.uploadedVideos || [];
+    global.uploadedVideos.push(newVideo);
+    
+    // Start the actual generation in the background
+    // In a real app, this would be a job queue or separate process
+    setTimeout(() => {
+      console.log(`Processing AI video generation for ${videoId} using ${selectedProvider}`);
+      // Real implementation would update the video status when complete
+    }, 100);
+    
+    // Respond with the generation info
     res.status(202).json({
-      id: Math.floor(Math.random() * 10000),
+      id: videoId,
       message: 'Video generation started',
       status: 'processing',
-      estimatedTime: '60 seconds'
+      estimatedTime: '60 seconds',
+      provider: selectedProvider,
+      video: newVideo
     });
   } catch (error) {
     console.error('AI video generation error:', error);
@@ -523,15 +582,15 @@ app.post('/api/admin/setup-api-keys', async (req, res) => {
     // 1. Validate admin credentials or require admin authentication middleware
     // 2. Store API keys in a secure environment or database, not just in-memory
     
-    const { runwayApiKey, pikaApiKey } = req.body;
+    const { runwayApiKey, fastpixApiKey } = req.body;
     
     // Update the environment variables
     if (runwayApiKey) {
       process.env.RUNWAY_API_KEY = runwayApiKey;
     }
     
-    if (pikaApiKey) {
-      process.env.PIKA_API_KEY = pikaApiKey;
+    if (fastpixApiKey) {
+      process.env.FASTPIX_API_KEY = fastpixApiKey;
     }
     
     // Import the API key utilities
